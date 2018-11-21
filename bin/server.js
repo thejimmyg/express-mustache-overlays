@@ -8,9 +8,9 @@ const main = async () => {
   const templateDefaults = { title: 'Title' }
   const mustacheDirs = [path.join(__dirname, '..', 'views')]
   await setupMustache(app, templateDefaults, mustacheDirs)
-  
-  app.get('/', (req,res)=>{
-    res.render('main', { user: {username: 'james'}, content: '<h1>Home</h1><p>Hello!</p>' })
+
+  app.get('/', (req, res) => {
+    res.render('main', { user: { username: 'james' }, content: '<h1>Home</h1><p>Hello!</p>' })
   })
 
   app.listen(port, () => console.log(`Example app listening on port ${port}`))
