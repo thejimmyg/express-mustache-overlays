@@ -13,7 +13,7 @@ This example serves templates from `views` and partials from `views/partials`:
 
 ```
 npm install
-DEBUG=express-mustache-overlays PORT=9005 node bin/server.js
+DEBUG=express-mustache-overlays PORT=9005 npm start
 ```
 
 Visit http://localhost:9005
