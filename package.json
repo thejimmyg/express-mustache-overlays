@@ -1,6 +1,6 @@
 {
   "name": "express-mustache-overlays",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Multiple mustache template directories with partials for express 4",
   "scripts": {
     "fix": "standard --fix index.js bin/*.js lib/*.js",

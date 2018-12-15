@@ -23,3 +23,18 @@ Visit http://localhost:9005
 ```
 npm run fix
 ```
+
+## Changelog
+
+### 0.1.2 2018-12-15
+
+* Throw an error if `mustacheDirs` is not an array
+* Use Flex-based templates in the example
+
+### 0.1.1
+
+* Reload on change
+
+### 0.1.0
+
+* First version
