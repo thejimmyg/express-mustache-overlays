@@ -26,6 +26,10 @@ npm run fix
 
 ## Changelog
 
+### 0.1.4 2018-12-15
+
+* Tweaked example to set from `MUSTACHE_DIRS` correctly
+
 ### 0.1.3 2018-12-15
 
 * Support the `MUSTACHE_DIRS` environment variable as a `:` separated list of paths to look at first before looking in the default `views` directory

@@ -1,7 +1,7 @@
 const express = require('express')
 const setupMustache = require('../lib/index.js')
 const path = require('path')
-const mustacheDirs = (process.env.MUSTACHE_DIRS || '').split(':')
+const mustacheDirs = process.env.MUSTACHE_DIRS ? process.env.MUSTACHE_DIRS.split(':') : []
 mustacheDirs.push(path.join(__dirname, '..', 'views'))
 
 const main = async () => {
