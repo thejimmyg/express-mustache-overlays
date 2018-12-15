@@ -1,12 +1,13 @@
 const express = require('express')
 const setupMustache = require('../lib/index.js')
 const path = require('path')
+const mustacheDirs = (process.env.MUSTACHE_DIRS || '').split(':')
+mustacheDirs.push(path.join(__dirname, '..', 'views'))
 
 const main = async () => {
   const app = express()
   const port = process.env.PORT || 9005
   const templateDefaults = { title: 'Title' }
-  const mustacheDirs = [path.join(__dirname, '..', 'views')]
   await setupMustache(app, templateDefaults, mustacheDirs)
 
   app.get('/', (req, res) => {

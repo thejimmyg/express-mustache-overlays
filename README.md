@@ -13,7 +13,7 @@ This example serves templates from `views` and partials from `views/partials`:
 
 ```
 npm install
-DEBUG=express-mustache-overlays PORT=9005 npm start
+MUSTACHE_DIRS=overlay DEBUG=express-mustache-overlays PORT=9005 npm start
 ```
 
 Visit http://localhost:9005
@@ -25,6 +25,13 @@ npm run fix
 ```
 
 ## Changelog
+
+### 0.1.3 2018-12-15
+
+* Support the `MUSTACHE_DIRS` environment variable as a `:` separated list of paths to look at first before looking in the default `views` directory
+* Listen to `all` events in partials such as add and delete as well as change
+* Improved logging of which partials directory is being reloaded
+* Throttle reloading with `lodash._throttle` and support sub directories
 
 ### 0.1.2 2018-12-15
 
