@@ -12,12 +12,13 @@ Some key features of this particular [Express](https://expressjs.com) and [Musta
 
 ## Configuration
 
-Library configuration environment variables:
+Configuration environment variables for the example.
 
 * `MUSTACHE_DIRS` - A `:` separated list of directories to overlay on top of the default views provided by `express-mustache-overlays`
 * `PUBLIC_FILE_DIRS` - A `:` separated list of directories to overlay on top of the default publis static files provided by `express-mustache-overlays`
 * `DEBUG` - Include `express-mustache-overlays` to get debug output from `express-mustache-overlays`
 * `SCRIPT_NAME` - Where the app that uses this is located. The public files will be served from `${SCRIPT_NAME}/public` by default
+* `PUBLIC_URL_PATH` - the full URL path to the public files directory
 
 Some of these can all be overriden when you set up mustache. For example:
 
@@ -25,18 +26,22 @@ Some of these can all be overriden when you set up mustache. For example:
 
 There is also `publicURLPath` option that allows you to specify the full path that the public files directories should be hosted at. `publicURLPath` is NOT relative to `SCRIPT_NAME` so you need to set it carefully if you don't like the default. And there is `expressStaticOptions` which is passed directly to `express.static` as its second parameter in case you want to configure express.
 
-Here's some code that makes use of this:
+Here's the code of the example that makes use of this:
 
 ```
 const express = require('express')
-const {setupMustacheOverlays, setupErrorHandlers} = require('express-mustache-overlays')
+const { setupMustacheOverlays, setupErrorHandlers } = require('../lib/index.js')
+
+const mustacheDirs = process.env.mustacheDirs ? process.env.MUSTACHE_DIRS.split(':') : []
+const publicFilesDirs = process.env.publicFilesDirs ? process.env.PUBLIC_FILES_DIRS.split(':') : []
+const scriptName = process.env.SCRIPT_NAME || ''
+const publicURLPath = process.env.PUBLIC_URL_PATH || '/public'
 
 const main = async () => {
   const app = express()
   const port = process.env.PORT || 80
-  const options = {} // e.g. {{expressStaticOptions: {dotfiles: 'allow'}}
 
-  const { scriptName, publicURLPath } = await setupMustacheOverlays(app, options)
+  await setupMustacheOverlays(app, { mustacheDirs: mustacheDirs, publicFilesDirs: publicFilesDirs, scriptName: scriptName, expressStaticOptions: {}, publicURLPath })
 
   // Simulate user signin
   // (Use the withUser() middleware from express-mustache-jwt-signin to do this properly)
@@ -92,6 +97,10 @@ npm run fix
 ```
 
 ## Changelog
+
+### 0.2.2 2018-12-20
+
+* Changed the way environment variables are handled internally. They are used in `bin` but not in `lib` now.
 
 ### 0.2.1 2018-12-20
 

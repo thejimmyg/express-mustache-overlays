@@ -1,12 +1,16 @@
 const express = require('express')
 const { setupMustacheOverlays, setupErrorHandlers } = require('../lib/index.js')
 
+const mustacheDirs = process.env.mustacheDirs ? process.env.MUSTACHE_DIRS.split(':') : []
+const publicFilesDirs = process.env.publicFilesDirs ? process.env.PUBLIC_FILES_DIRS.split(':') : []
+const scriptName = process.env.SCRIPT_NAME || ''
+const publicURLPath = process.env.PUBLIC_URL_PATH || '/public'
+
 const main = async () => {
   const app = express()
   const port = process.env.PORT || 80
-  const options = {} // e.g. {{expressStaticOptions: {dotfiles: 'allow'}}
 
-  const { scriptName, publicURLPath } = await setupMustacheOverlays(app, options)
+  await setupMustacheOverlays(app, { mustacheDirs: mustacheDirs, publicFilesDirs: publicFilesDirs, scriptName: scriptName, expressStaticOptions: {}, publicURLPath })
 
   // Simulate user signin
   // (Use the withUser() middleware from express-mustache-jwt-signin to do this properly)
