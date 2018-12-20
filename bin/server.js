@@ -21,7 +21,7 @@ const main = async () => {
   // Note: scriptName and publicURLPath are expected by the 404 and 500 handlers
   //       so you must set this middleware if using setupErrorHandlers()
   app.use((req, res, next) => {
-    res.locals = { publicURLPath, scriptName, title: 'Express Mustache Overlays', user: req.user }
+    res.locals = Object.assign({}, res.locals, { publicURLPath, scriptName, title: 'Express Mustache Overlays', user: req.user })
     next()
   })
 

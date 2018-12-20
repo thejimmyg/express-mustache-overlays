@@ -7,7 +7,7 @@ Some key features of this particular [Express](https://expressjs.com) and [Musta
 * Searches in a series of view directories in turn for each template or partial, effectively allowing you to *overlay* one view directory on another
 * Demonstrates how to use template defaults that can also take information from the Express request
 * Can also be used to overlay public static files required by the views and partials
-* Provides a basic Bootstrap Flex layout, `400`, `403`, `500` and `content` templates and `top` and `bottom` partials
+* Provides a basic Bootstrap Flex layout, `400`, `500` and `content` templates and `top` and `bottom` partials
 
 
 ## Configuration
@@ -51,7 +51,7 @@ const main = async () => {
   // Note: scriptName and publicURLPath are expected by the 404 and 500 handlers
   //       so you must set this middleware if using setupErrorHandlers()
   app.use((req, res, next) => {
-    res.locals = { publicURLPath, scriptName, title: 'Express Mustache Overlays', user: req.user }
+    res.locals = Object.assign({}, res.locals, { publicURLPath, scriptName, title: 'Express Mustache Overlays', user: req.user })
     next()
   })
 
@@ -92,6 +92,11 @@ npm run fix
 ```
 
 ## Changelog
+
+### 0.2.1 2018-12-20
+
+* Removed 403 template. Makes more sense in `express-mustache-jwt-signin`
+* Refactored `bottom.mustache` to use `footer.mustache`
 
 ### 0.2.0 2018-12-20
 
