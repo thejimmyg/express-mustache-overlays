@@ -1,0 +1,18 @@
+{
+  "manifest_version": 2,
+  "name": "Express Mustache Overlays App",
+  "display": "standalone",
+  "background_color": "#fff",
+  "themer_color": "#000",
+  "short_name": "express-mustache-overlays",
+  "version": "0.1.0",
+  "default_locale": "en", 
+  "description": "An app",
+  "icons": [
+    {
+        "src": "icon.png",
+        "sizes": "192x192",
+        "type": "image/png"
+    }
+  ]
+} 
