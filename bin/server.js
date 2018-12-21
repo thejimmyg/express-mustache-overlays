@@ -4,7 +4,8 @@ const { setupMustacheOverlays, setupErrorHandlers } = require('../lib/index.js')
 const mustacheDirs = process.env.mustacheDirs ? process.env.MUSTACHE_DIRS.split(':') : []
 const publicFilesDirs = process.env.publicFilesDirs ? process.env.PUBLIC_FILES_DIRS.split(':') : []
 const scriptName = process.env.SCRIPT_NAME || ''
-const publicURLPath = process.env.PUBLIC_URL_PATH || '/public'
+const publicURLPath = process.env.PUBLIC_URL_PATH || scriptName + '/public'
+const title = process.env.TITLE || 'Express Mustache Overlays'
 
 const main = async () => {
   const app = express()
@@ -16,16 +17,7 @@ const main = async () => {
   // (Use the withUser() middleware from express-mustache-jwt-signin to do this properly)
   app.use((req, res, next) => {
     req.user = { username: 'james' }
-    next()
-  })
-
-  // Keep this just before the routes, so that everything else is already set up
-  // including your user middleware
-  // Set template defaults (including request-specific options)
-  // Note: scriptName and publicURLPath are expected by the 404 and 500 handlers
-  //       so you must set this middleware if using setupErrorHandlers()
-  app.use((req, res, next) => {
-    res.locals = Object.assign({}, res.locals, { publicURLPath, scriptName, title: 'Express Mustache Overlays', user: req.user })
+    res.locals = Object.assign({}, res.locals, {user: req.user})
     next()
   })
 
