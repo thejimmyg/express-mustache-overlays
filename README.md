@@ -8,7 +8,7 @@ Some key features of this particular [Express](https://expressjs.com) and [Musta
 * Demonstrates how to use template defaults that can also take information from the Express request
 * Can also be used to overlay public static files required by the views and partials
 * Provides a basic Bootstrap Flex layout, `400`, `500` and `content` templates and `top` and `bottom` partials
-
+* Sets `publicURLPath`, `scriptName`, and `title` on `app.locals` (and `res.locals` for access by views during requests)
 
 ## Configuration
 
@@ -30,34 +30,34 @@ Here's the code of the example that makes use of this:
 
 ```
 const express = require('express')
-const { setupMustacheOverlays, setupErrorHandlers } = require('../lib/index.js')
+const { prepareMustacheOverlays, setupErrorHandlers } = require('../lib/index.js')
 
 const mustacheDirs = process.env.mustacheDirs ? process.env.MUSTACHE_DIRS.split(':') : []
 const publicFilesDirs = process.env.publicFilesDirs ? process.env.PUBLIC_FILES_DIRS.split(':') : []
 const scriptName = process.env.SCRIPT_NAME || ''
-const publicURLPath = process.env.PUBLIC_URL_PATH || '/public'
+const publicURLPath = process.env.PUBLIC_URL_PATH || scriptName + '/public'
+const title = process.env.TITLE || 'Express Mustache Overlays'
 
 const main = async () => {
   const app = express()
   const port = process.env.PORT || 80
 
-  await setupMustacheOverlays(app, { mustacheDirs: mustacheDirs, publicFilesDirs: publicFilesDirs, scriptName: scriptName, expressStaticOptions: {}, publicURLPath })
+  const overlays = await prepareMustacheOverlays(app, { mustacheDirs, publicFilesDirs, scriptName, expressStaticOptions: {}, publicURLPath, title })
 
   // Simulate user signin
   // (Use the withUser() middleware from express-mustache-jwt-signin to do this properly)
   app.use((req, res, next) => {
     req.user = { username: 'james' }
+    res.locals = Object.assign({}, res.locals, { user: req.user })
     next()
   })
 
-  // Keep this just before the routes, so that everything else is already set up
-  // including your user middleware
-  // Set template defaults (including request-specific options)
-  // Note: scriptName and publicURLPath are expected by the 404 and 500 handlers
-  //       so you must set this middleware if using setupErrorHandlers()
-  app.use((req, res, next) => {
-    res.locals = Object.assign({}, res.locals, { publicURLPath, scriptName, title: 'Express Mustache Overlays', user: req.user })
-    next()
+  // Set up any other overlays directories here
+  mustacheDirs.forEach(dir => {
+    overlays.overlayMustacheDir(dir)
+  })
+  publicFilesDirs.forEach(dir => {
+    overlays.overlayPublicFilesDir(dir)
   })
 
   // Render the page, with the default title and request username as well as the content
@@ -65,9 +65,11 @@ const main = async () => {
     res.render('content', { content: '<h1>Home</h1><p>Hello!</p>' })
   })
 
+  // Put the overlays into place after you've set up any more overlays you need, but definitely before the error handlers
+  overlays.setup()
+
   // Keep this right at the end, immediately before listening
   setupErrorHandlers(app)
-
   app.listen(port, () => console.log(`Example app listening on port ${port}`))
 }
 
@@ -97,6 +99,14 @@ npm run fix
 ```
 
 ## Changelog
+
+### 0.3.0 2018-12-21
+
+* Split `setupMustacheOverlays(...)` into `const overlays = prepareMustacheOverlays(...)` and `overlays.setup()`
+* Refactored to use `app.locals` for `title`, `publicURLPath` and `scriptName`
+* Shortened the watch throttle timeout on changed partials from 500ms to 200ms
+* Prevented partials reload events happening on initial load
+* Added error checking from shelljs command
 
 ### 0.2.2 2018-12-20
 
