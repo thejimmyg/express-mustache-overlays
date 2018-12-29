@@ -104,6 +104,11 @@ npm run fix
 
 ## Changelog
 
+### 0.3.3 2018-12-29
+
+* Return `{renderFile, findView, renderView}` from `setup()`, not just the `renderFile` function. The new `renderView` function will resolve the correct template file based on its name (just like calls to `res.render()` so that you don't need to do the looking up yourself.
+* Added missing `debug` import in `bin/server.js`
+
 ### 0.3.2 2018-12-29
 
 * Wrapped the content in the `views/content.mustache` template in an `<article>` tag.
