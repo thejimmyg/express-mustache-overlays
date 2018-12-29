@@ -104,6 +104,10 @@ npm run fix
 
 ## Changelog
 
+### 0.3.2 2018-12-29
+
+* Wrapped the content in the `views/content.mustache` template in an `<article>` tag.
+
 ### 0.3.1 2018-12-29
 
 * `overlays.setup()` now returns a `render(path, options)` method that can also be used outside the Express context
