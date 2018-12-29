@@ -10,6 +10,10 @@ Some key features of this particular [Express](https://expressjs.com) and [Musta
 * Provides a basic Bootstrap Flex layout, `400`, `500` and `content` templates and `top` and `bottom` partials
 * Sets `publicURLPath`, `scriptName`, and `title` on `app.locals` (and `res.locals` for access by views during requests)
 
+## Customize
+
+In `public/theme` you'll find a `manifest.json` file and `icon.png` that you'll want to override in your own public overlay.
+
 ## Configuration
 
 Configuration environment variables for the example.
@@ -66,7 +70,7 @@ const main = async () => {
   })
 
   // Put the overlays into place after you've set up any more overlays you need, but definitely before the error handlers
-  overlays.setup()
+  await overlays.setup()
 
   // Keep this right at the end, immediately before listening
   setupErrorHandlers(app)
@@ -99,6 +103,10 @@ npm run fix
 ```
 
 ## Changelog
+
+### 0.3.1 2018-12-29
+
+* `overlays.setup()` now returns a `render(path, options)` method that can also be used outside the Express context
 
 ### 0.3.0 2018-12-21
 
