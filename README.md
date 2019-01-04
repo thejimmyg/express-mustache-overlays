@@ -20,7 +20,7 @@ Configuration environment variables for the example.
 
 * `MUSTACHE_DIRS` - A `:` separated list of directories to overlay on top of the default views provided by `express-mustache-overlays`
 * `PUBLIC_FILE_DIRS` - A `:` separated list of directories to overlay on top of the default publis static files provided by `express-mustache-overlays`
-* `DEBUG` - Include `express-mustache-overlays` to get debug output from `express-mustache-overlays`
+* `DEBUG` - Include `express-mustache-overlays` to get debug output from the `express-mustache-overlays` library itself and `express-mustache-overlays:server` for messages from the example server.
 * `SCRIPT_NAME` - Where the app that uses this is located. The public files will be served from `${SCRIPT_NAME}/public` by default
 * `PUBLIC_URL_PATH` - the full URL path to the public files directory
 
@@ -33,6 +33,7 @@ There is also `publicURLPath` option that allows you to specify the full path th
 Here's the code of the example that makes use of this:
 
 ```
+const debug = require('debug')('express-mustache-overlays:server')
 const express = require('express')
 const { prepareMustacheOverlays, setupErrorHandlers } = require('../lib/index.js')
 
@@ -73,12 +74,18 @@ const main = async () => {
   await overlays.setup()
 
   // Keep this right at the end, immediately before listening
-  setupErrorHandlers(app)
+  setupErrorHandlers(app, { debug })
   app.listen(port, () => console.log(`Example app listening on port ${port}`))
 }
 
 main()
 ```
+
+## Error handling
+
+Make sure you pass an optional `debug` function to `setupErrorHandlers(app, {debug})` in a third party app, since otherwise the traceback will be logged under `express-mustache-overlays` rather than whatever name is the default in your other project. If this is what you want, just make sure you set `DEBUG=express-mustache-overlays` when running your app so that messages from your app appear in the log output.
+
+There is a `/throw` endpoint in the sample server so you can test this behaviour.
 
 ## Example
 
@@ -86,7 +93,7 @@ This example serves templates from `views` and partials from `views/partials`:
 
 ```
 npm install
-MUSTACHE_DIRS=overlay DEBUG=express-mustache-overlays PORT=8000 npm start
+MUSTACHE_DIRS=overlay DEBUG=express-mustache-overlays,express-mustache-overlays:server PORT=8000 npm start
 ```
 
 Visit http://localhost:8000
@@ -103,6 +110,10 @@ npm run fix
 ```
 
 ## Changelog
+
+### 0.3.4 2019-01-04
+
+* Added a `options` to `setupErrorHandlers()` to allow `debug` to optionally be passed to the error handlers. This means errors from an app will be logged with the apps they come from, rather than from `express-mustache-overlays`.
 
 ### 0.3.3 2018-12-29
 

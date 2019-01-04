@@ -1,6 +1,6 @@
 const express = require('express')
 const { prepareMustacheOverlays, setupErrorHandlers } = require('../lib/index.js')
-const debug = require('debug')('express-mustache-overlays')
+const debug = require('debug')('express-mustache-overlays:server')
 const mustacheDirs = process.env.mustacheDirs ? process.env.MUSTACHE_DIRS.split(':') : []
 const publicFilesDirs = process.env.publicFilesDirs ? process.env.PUBLIC_FILES_DIRS.split(':') : []
 const scriptName = process.env.SCRIPT_NAME || ''
@@ -31,13 +31,20 @@ const main = async () => {
     overlays.overlayPublicFilesDir(dir)
   })
 
+  app.get('/throw', async (req, res, next) => {
+    try {
+      throw new Error('Sample error')
+    } catch (e) {
+      next(e)
+    }
+  })
+
   // Render the page, with the default title and request username as well as the content
   app.get('/', async (req, res, next) => {
     try {
       const html = await renderView('content', { content: 'render()' })
       res.render('content', { content: '<h1>Home</h1><p>Hello!</p><pre>' + mustache.escape(html) + '</pre>' })
     } catch (e) {
-      debug(e)
       next(e)
     }
   })
@@ -47,7 +54,7 @@ const main = async () => {
   renderView = renderers.renderView
 
   // Keep this right at the end, immediately before listening
-  setupErrorHandlers(app)
+  setupErrorHandlers(app, { debug })
   app.listen(port, () => console.log(`Example app listening on port ${port}`))
 }
 
