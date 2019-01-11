@@ -1,29 +1,23 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8">
     <link rel="stylesheet" href="{{publicURLPath}}/theme/bootstrap.min.css">
-    <script src="{{publicURLPath}}/theme/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="{{publicURLPath}}/theme/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="{{publicURLPath}}/theme/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script src="{{publicURLPath}}/theme/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <script src="{{publicURLPath}}/theme/jquery-pjax-2.0.1.js" crossorigin="anonymous"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{title}}</title>
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="no">
     <link rel="manifest" href="{{publicURLPath}}/theme/manifest.json">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="theme-color" content="#000000" />
     <link rel="apple-touch-icon" href="{{publicURLPath}}/theme/icon.png">
     <link rel="icon" sizes="192x192" href="{{publicURLPath}}/theme/icon.png">
     <link rel="shortcut icon" type="image/png" href="{{publicURLPath}}/theme/icon.png">
+    {{#metaDescription}}<meta name="description" content="{{metaDescription}}">{{/metaDescription}}
   </head>
   <body>
-    <div class="d-flex flex-column" style="min-height: 100vh;">
-      <div class="d-flex flex-row">
-        <div class="p-3">
-          {{>nav}}
-        </div>
-        <div class="p-3 text-right flex-grow-1">
-          {{>userStatus}}
-        </div>
-      </div>
+    {{>bodyTop}}
