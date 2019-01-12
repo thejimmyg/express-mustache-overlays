@@ -1,27 +1,23 @@
 const express = require('express')
 const compression = require('compression')
 const path = require('path')
-const shell = require('shelljs')
 const { prepareMustacheOverlays, setupErrorHandlers } = require('../lib/index.js')
 const debug = require('debug')('express-mustache-overlays:server')
-const fs = require('fs')
-const { promisify } = require('util')
-const lstatAsync = promisify(fs.lstat)
 const mustacheDirs = process.env.mustacheDirs ? process.env.MUSTACHE_DIRS.split(':') : []
 const publicFilesDirs = process.env.publicFilesDirs ? process.env.PUBLIC_FILES_DIRS.split(':') : []
 const scriptName = process.env.SCRIPT_NAME || ''
 const publicURLPath = process.env.PUBLIC_URL_PATH || scriptName + '/public'
-const serviceWorkerPath = process.env.SERVICE_WORKER_PATH || ''
+const withPjaxPwa = (process.env.WITH_PJAX_PWA || 'false').toLowerCase() === 'true'
 const title = process.env.TITLE || 'Express Mustache Overlays'
 const mustache = require('mustache')
-const publicFilesDir = path.normalize(path.join(__dirname, '..', 'public'))
+// const publicFilesDir = path.normalize(path.join(__dirname, '..', 'public'))
 const port = process.env.PORT || 80
 
 const main = async () => {
   const app = express()
   app.use(compression())
 
-  const overlays = await prepareMustacheOverlays(app, { scriptName, expressStaticOptions: {}, publicURLPath, title })
+  const overlays = await prepareMustacheOverlays(app, { scriptName, expressStaticOptions: {}, publicURLPath, title, withPjaxPwa })
   let renderView
 
   // Simulate user signin
@@ -59,73 +55,6 @@ const main = async () => {
     }
   })
 
-  // Change this to refresh the service worker and fetch /offline again
-  app.get(serviceWorkerPath + '/sw.js', async (req, res, next) => {
-    try {
-      res.type('application/javascript')
-      const themeDir = path.join(publicFilesDir, 'theme')
-      const ls = shell.ls('-R', themeDir)
-      if (shell.error()) {
-        throw new Error('Could not list ' + themeDir)
-      }
-      const files = [scriptName + '/offline', scriptName + '/start']
-      for (let filename of ls) {
-        const stat = await lstatAsync(path.join(themeDir, filename))
-        if (stat.isFile()) {
-          files.push(publicURLPath + '/theme/' + encodeURIComponent(filename))
-        }
-      }
-      res.send(`
-// 2019-01-10
-var filesToCache = ${JSON.stringify(files)};
-
-self.addEventListener('install', function(event) {
-  // event.waitUntil(self.skipWaiting())
-  var promises = [];
-  filesToCache.forEach(function(fileToCache) {
-    var offlineRequest = new Request(fileToCache);
-    console.log('Preparing fetch for', fileToCache);
-    promises.push(
-      fetch(offlineRequest).then(function(response) {
-        return caches.open('offline').then(function(cache) {
-          console.log('[oninstall] Cached offline page', response.url);
-          var r = cache.put(offlineRequest, response);
-          r.then(function(t) {
-            console.log('Fetched', t)
-          })
-          return r
-        });
-      })
-    )
-  })
-  event.waitUntil(Promise.all(promises).then(function(success) { self.skipWaiting() ; console.log('Finished populating the cache. Ready.'); return success }));
-});
-
-self.addEventListener('fetch', function(event) {
-  event.respondWith(
-    fetch(event.request)
-    .catch(function (error) {
-      return caches.open('offline')
-      .then(function(cache) {
-        var url = new URL(event.request.url)
-        var path = url.pathname
-        if (filesToCache.includes(path)) {
-          console.log('Returning path "' + path + '" from cache ...')
-          return cache.match(path)
-        } else {
-          console.log('Returning "${scriptName}/offline" for path "' + path + '" since it is not in the cache ...')
-          return cache.match('${scriptName}/offline')
-        }
-      })
-    })
-  );
-});
-`)
-    } catch (e) {
-      next(e)
-    }
-  })
-
   app.get('/throw', async (req, res, next) => {
     try {
       throw new Error('Sample error')
@@ -154,7 +83,7 @@ self.addEventListener('fetch', function(event) {
   })
 
   // Put the overlays into place after you've set up any more overlays you need, but definitely before the error handlers
-  const renderers = await overlays.setup()
+  const renderers = await overlays.setup({ debug })
   renderView = renderers.renderView
 
   // Keep this right at the end, immediately before listening

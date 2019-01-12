@@ -1,8 +1,9 @@
 <script>
-'use strict'
+{{#withPjaxPwa}}
 {{>pjax}}
 {{>onlineStatus}}
 {{!>serviceWorkerUninstall}}
-{{!>serviceWorker}}
+{{>serviceWorker}}
 {{>installPrompt}}
+{{/withPjaxPwa}}
 </script>

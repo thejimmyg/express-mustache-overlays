@@ -23,7 +23,7 @@ Configuration environment variables for the example.
 * `DEBUG` - Include `express-mustache-overlays` to get debug output from the `express-mustache-overlays` library itself and `express-mustache-overlays:server` for messages from the example server.
 * `SCRIPT_NAME` - Where the app that uses this is located. The public files will be served from `${SCRIPT_NAME}/public` by default
 * `PUBLIC_URL_PATH` - the full URL path to the public files directory
-* `SERVICE_WORKER_PATH` - the base URL path that the `sw.js` file should be served from. This is often different from `PUBLIC_URL_PATH` because you often want to serve your service worker from the root of the domain. Defaults to `''`.
+* `WITH_PJAX_PWA` - can be `"true"` if you want to enable progressive web app features for use with `gateway-lite` or `"false"` otherwise. Defaults to `"false"`. This affects the content of `views/partials/bodyEnd.mustache`
 
 Some of these can all be overriden when you set up mustache. For example:
 
@@ -119,25 +119,25 @@ npm run fix
 
 ## Changelog
 
-### 0.3.5 2019-01-10
+### 0.3.5 2019-01-12
 
-* Made the default template behave as a single page app and a progressive web app using PJAX and a service worker:
+* Made the default template behave as a single page app using PJAX and a service worker, and added URLs that are needed to serve this as a progressive web app via `gateway-lite`
   * Added a wrapper `pjax-container` to the entire body of the template
-  * Changed from jQuery slim ro jQuery
+  * Changed from jQuery slim to normal jQuery
   * Introduced jQuery PJAX so that full page reloads aren't required as you navigate, instead the `<div id="pjax-container">` content is replaced into the existing div. **Caution: This means extra infomtation in the `<head>` or reloaded outside `<div id="pjax-container">` will not be loaded
   * Added PJAX initialisation that installs a `pjax:error` handler which inserts a simple you are offline message
   * Added a `/offline` route to `bin/server.js` to generate a simple offline message page
-  * Added a `/sw.js` route to `bin/server.js` (rather than into `public` since a service worker needs to be at the root it is designed to work with). It caches the resources the page needs, as well as the `/offline` page. When offline, if the page can't be loaded at all to trigger the PJAX offline page, this makes use of the cached one instead.
   * Changed `<meta name="apple-mobile-web-app-capable" content="yes">` to `no` since apple still doesn't handle PWAs very well (cookies are lost as users switch to a different app and back).
-  * Added a 512px icon to `manifest.json` as required by Chrome packaged apps
+  * Removed `manifest.json` and the icons as they can now be served by gateway-lite instead
   * WONT Support PJAX container-only HTML responses - makes the cacheing of the responses by service worker more complex.
   * Changed partial structure so that there are more overrides possible
   * Added gzip compresssion to the example
   * Setting the `metaDescription` local to a string results in a meta description tag being added for SEO
   * Make the PJAX offline message the same as the one in the service worker cache by fetching that page with an AJAX call.
   * Add online/offline handlers as a partial
-  * Create a `/start` URL that is used when the app starts. **Caution: This is not automatically reflected in `manifest.json`**
-  * Automatically generate the list of `filesToCache` based on what is in the `public/theme` directry
+  * Create a `/start` URL that is used when the app starts.
+  * By default the service worker install, uninstall, pjax and install prompt are all disabled in `views/partials/bodyEnd.mustache` with the use of the `!` (a mustache comment) in the partial includes.
+
 
 ### 0.3.4 2019-01-04
 
