@@ -1,27 +1,26 @@
 const express = require('express')
 const compression = require('compression')
 const path = require('path')
-const { prepareMustacheOverlays, setupErrorHandlers } = require('../lib/index.js')
-const debug = require('debug')('express-mustache-overlays:server')
-const mustacheDirs = process.env.mustacheDirs ? process.env.MUSTACHE_DIRS.split(':') : []
-const publicFilesDirs = process.env.publicFilesDirs ? process.env.PUBLIC_FILES_DIRS.split(':') : []
-const scriptName = process.env.SCRIPT_NAME || ''
-const offlineUrl = process.env.OFFLINE_URL || ''
-const serviceWorkerUrl = process.env.SERVICE_WORKER_URL || ''
-const manifestUrl = process.env.MANIFEST_URL || ''
-const publicURLPath = process.env.PUBLIC_URL_PATH || scriptName + '/public'
-const icon192Url = process.env.ICON_192_URL || publicURLPath + '/theme/icon.png'
-const withPjaxPwa = (process.env.WITH_PJAX_PWA || 'false').toLowerCase() === 'true'
-const title = process.env.TITLE || 'Express Mustache Overlays'
 const mustache = require('mustache')
+const { overlaysOptionsFromEnv, overlaysDirsFromEnv, prepareMustacheOverlays, setupErrorHandlers } = require('../lib/index.js')
+const debug = require('debug')('express-mustache-overlays:server')
+const title = process.env.TITLE || 'Express Mustache Overlays'
 // const publicFilesDir = path.normalize(path.join(__dirname, '..', 'public'))
 const port = process.env.PORT || 80
+
+const overlaysOptions = overlaysOptionsFromEnv()
+// Extract the options you want to use elsewhere in your script too
+const { scriptName } = overlaysOptions
+const { mustacheDirs, publicFilesDirs } = overlaysDirsFromEnv()
 
 const main = async () => {
   const app = express()
   app.use(compression())
 
-  const overlays = await prepareMustacheOverlays(app, { scriptName, expressStaticOptions: {}, publicURLPath, title, withPjaxPwa, offlineUrl, manifestUrl, serviceWorkerUrl, icon192Url })
+  overlaysOptions.expressStaticOptions = {}
+  overlaysOptions.title = title
+  const overlays = await prepareMustacheOverlays(app, overlaysOptions)
+
   let renderView
 
   // Simulate user signin

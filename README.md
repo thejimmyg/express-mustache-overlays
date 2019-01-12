@@ -18,10 +18,6 @@ In `public/theme` you'll find a `manifest.json` file and `icon.png` that you'll 
 
 Configuration environment variables for the example.
 
-* `MUSTACHE_DIRS` - A `:` separated list of directories to overlay on top of the default views provided by `express-mustache-overlays`
-* `PUBLIC_FILE_DIRS` - A `:` separated list of directories to overlay on top of the default publis static files provided by `express-mustache-overlays`
-* `DEBUG` - Include `express-mustache-overlays` to get debug output from the `express-mustache-overlays` library itself and `express-mustache-overlays:server` for messages from the example server.
-* `PORT` - Defaults to 80, but set it to something like 8000 if you want to run without needing `sudo`
 * `SCRIPT_NAME` - Where the app that uses this is located. The public files will be served from `${SCRIPT_NAME}/public` by default
 * `PUBLIC_URL_PATH` - the full URL path to the public files directory
 * `WITH_PJAX_PWA` - can be `"true"` if you want to enable progressive web app features for use with `gateway-lite` or `"false"` otherwise. Defaults to `"false"`. This affects the content of `views/partials/bodyEnd.mustache`
@@ -30,9 +26,15 @@ Configuration environment variables for the example.
 * `SERVICE_WORKER_URL` - if using `WITH_PJAX_PWA`, this is the URL to your `sw.js` file
 * `ICON_192_URL` - the URL to a 192x192 PNG file to use as the icon
 
-Some of these can all be overriden when you set up mustache. For example:
+There is also:
 
-`mustacheDirs: []`, `publicFilesDirs: []`, `scriptName='/some/path'`
+* `DEBUG` - Include `express-mustache-overlays` to get debug output from the `express-mustache-overlays` library itself and `express-mustache-overlays:server` for messages from the example server.
+* `PORT` - Defaults to 80, but set it to something like 8000 if you want to run without needing `sudo`
+
+Most apps that use this library will also use:
+
+* `MUSTACHE_DIRS` - A `:` separated list of directories to overlay on top of the default views provided by `express-mustache-overlays`
+* `PUBLIC_FILE_DIRS` - A `:` separated list of directories to overlay on top of the default publis static files provided by `express-mustache-overlays`
 
 There is also `publicURLPath` option that allows you to specify the full path that the public files directories should be hosted at. `publicURLPath` is NOT relative to `SCRIPT_NAME` so you need to set it carefully if you don't like the default. And there is `expressStaticOptions` which is passed directly to `express.static` as its second parameter in case you want to configure express.
 
@@ -41,19 +43,21 @@ Here's the code of the example that makes use of this:
 ```
 const debug = require('debug')('express-mustache-overlays:server')
 const express = require('express')
-const { prepareMustacheOverlays, setupErrorHandlers } = require('../lib/index.js')
+const { overlaysOptionsFromEnv, overlaysDirsFromEnv, prepareMustacheOverlays, setupErrorHandlers } = require('express-mustache-overlays')
 
-const mustacheDirs = process.env.mustacheDirs ? process.env.MUSTACHE_DIRS.split(':') : []
-const publicFilesDirs = process.env.publicFilesDirs ? process.env.PUBLIC_FILES_DIRS.split(':') : []
-const scriptName = process.env.SCRIPT_NAME || ''
-const publicURLPath = process.env.PUBLIC_URL_PATH || scriptName + '/public'
+const overlaysOptions = overlaysOptionsFromEnv()
+const { scriptName, publicURLPath } = overlaysOptions
+const { mustacheDirs, publicFilesDirs } = overlaysDirsFromEnv()
+
 const title = process.env.TITLE || 'Express Mustache Overlays'
 
 const main = async () => {
   const app = express()
   const port = process.env.PORT || 80
 
-  const overlays = await prepareMustacheOverlays(app, { mustacheDirs, publicFilesDirs, scriptName, expressStaticOptions: {}, publicURLPath, title })
+  overlaysOptions.expressStaticOptions = {}
+  overlaysOptions.title = title
+  const overlays = await prepareMustacheOverlays(app, overlaysOptions)
 
   // Simulate user signin
   // (Use the withUser() middleware from express-mustache-jwt-signin to do this properly)
@@ -77,7 +81,8 @@ const main = async () => {
   })
 
   // Put the overlays into place after you've set up any more overlays you need, but definitely before the error handlers
-  await overlays.setup()
+  // Pass the debug logger you want to be used for any error messages
+  await overlays.setup({ debug })
 
   // Keep this right at the end, immediately before listening
   setupErrorHandlers(app, { debug })
@@ -110,7 +115,6 @@ To use this as part of a PJAX progressive web app setup:
 MUSTACHE_DIRS=overlay DEBUG=express-mustache-overlays,express-mustache-overlays:server WITH_PJAX_PWA=true OFFLINE_URL="/offline" MANIFEST_URL="/public/theme/manifest.json" SERVICE_WORKER_URL="/sw.js" ICON_192_URL="/public/theme/icon192.png" PORT=8000 npm start
 ```
 
-
 To run this behind an HTTPS proxy, you could install Gateway Lite (`npm install -g gateway-lite`), configure a self-signed HTTPS certificate and then add it to your OS keychain, then run:
 
 ```
@@ -124,7 +128,13 @@ DEBUG=gateway-lite gateway-lite --https-port 443 --port 80 --cert domain/www.exa
 npm run fix
 ```
 
+
 ## Changelog
+
+### 0.3.8 2019-01-12
+
+* Added `overlaysOptionsFromEnv()` function to parse all the overlays options that can be specified as environment variables.
+* Added `overlaysDirsFromEnv()` function to parse the `MUSTACHE_OVERLAYS_DIRS` and `PUBLIC_FILES_DIRS` environment variables.
 
 ### 0.3.7 2019-01-12
 
