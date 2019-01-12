@@ -1,33 +1,34 @@
-      $(document).ready(function() {
-        console.log('Installing pjax ...')
-        $(document).pjax('a', '#pjax-container', {"timeout": 2000, "fragment": "#pjax-container"})
-        $.ajax({
-          method: "GET",
-          url: "{{scriptName}}/offline",
-          dataType: "text"
-        }).done(function(offlineText) {
-          $(document).on('pjax:error', function(event, xhr, textStatus, errorThrown, options) {
-            console.log('Handling pjax error page response without a hard refresh ...')
-            if (xhr.responseText) {
-              options.success(xhr.responseText, textStatus, xhr);
-            } else {
-              options.success(offlineText, 'error', xhr);
-              event.preventDefault()
-            }
-            setTimeout(checkOnlineStatus, 200)
-            return false;
-          })
-          // $(document).on('pjax:timeout', function(event, xhr, options) {
-          //   console.log('Handling timeout ...')
-          //   console.log(xhr)
-          //   //options.success('<div id="pjax-container">Hello!</div>', 'timeout', xhr);
-          //   // options.success(xhr.responseText, 'timeout', xhr);
-          //   // return false;
-          // })
-          // $(document).on('pjax:end', function(event, xhr, options) {
-          //   console.log('Handling end ...', arguments)
-          //   options.success(xhr.responseText, textStatus, xhr);
-          //   return false;
-          // })
-        })
-      })
+$(document).ready(function() {
+  console.log('Installing pjax ...')
+  $(document).pjax('a', '#pjax-container', {"timeout": 2000, "fragment": "#pjax-container"})
+  var install = function(offlineText) {
+    $(document).on('pjax:error', function(event, xhr, textStatus, errorThrown, options) {
+      console.log('Handling pjax error page response without a hard refresh ...')
+      if (xhr.responseText) {
+        options.success(xhr.responseText, textStatus, xhr);
+      } else {
+        options.success(offlineText, 'error', xhr);
+        event.preventDefault()
+      }
+      setTimeout(checkOnlineStatus, 200)
+      return false;
+    })
+  }
+  {{#offlineUrl}}
+  try {
+    $.ajax({
+      method: "GET",
+      // Should be a trusted string, so replaceing the / escaping should be safe
+      url: "{{offlineUrl}}".replace(/&#x2F;/g, '/'),
+      dataType: "text"
+    }).done(install)
+  } catch (e) {
+    console.error('PJAX offline fetch error:', e)
+    install('Offline')
+  }
+  {{/offlineUrl}}
+  {{^offlineUrl}}
+    console.error('PJAX error - no offlineUrl specified')
+    install('Offline')
+  {{/offlineUrl}}
+})

@@ -6,7 +6,11 @@ const debug = require('debug')('express-mustache-overlays:server')
 const mustacheDirs = process.env.mustacheDirs ? process.env.MUSTACHE_DIRS.split(':') : []
 const publicFilesDirs = process.env.publicFilesDirs ? process.env.PUBLIC_FILES_DIRS.split(':') : []
 const scriptName = process.env.SCRIPT_NAME || ''
+const offlineUrl = process.env.OFFLINE_URL || ''
+const serviceWorkerUrl = process.env.SERVICE_WORKER_URL || ''
+const manifestUrl = process.env.MANIFEST_URL || ''
 const publicURLPath = process.env.PUBLIC_URL_PATH || scriptName + '/public'
+const icon192Url = process.env.ICON_192_URL || publicURLPath + '/theme/icon.png'
 const withPjaxPwa = (process.env.WITH_PJAX_PWA || 'false').toLowerCase() === 'true'
 const title = process.env.TITLE || 'Express Mustache Overlays'
 const mustache = require('mustache')
@@ -17,7 +21,7 @@ const main = async () => {
   const app = express()
   app.use(compression())
 
-  const overlays = await prepareMustacheOverlays(app, { scriptName, expressStaticOptions: {}, publicURLPath, title, withPjaxPwa })
+  const overlays = await prepareMustacheOverlays(app, { scriptName, expressStaticOptions: {}, publicURLPath, title, withPjaxPwa, offlineUrl, manifestUrl, serviceWorkerUrl, icon192Url })
   let renderView
 
   // Simulate user signin
@@ -66,7 +70,7 @@ const main = async () => {
   // Render the page, with the default title and request username as well as the content
   app.get('/', async (req, res, next) => {
     try {
-      const html = await renderView('content', { content: 'render()' })
+      const html = await renderView('content', { content: 'render()', metaDescription: 'Home page' })
       res.render('content', { content: '<h1>Home</h1><p>Hello!</p><pre>' + mustache.escape(html) + '</pre>', metaDescription: 'Home page' })
     } catch (e) {
       next(e)

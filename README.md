@@ -21,9 +21,14 @@ Configuration environment variables for the example.
 * `MUSTACHE_DIRS` - A `:` separated list of directories to overlay on top of the default views provided by `express-mustache-overlays`
 * `PUBLIC_FILE_DIRS` - A `:` separated list of directories to overlay on top of the default publis static files provided by `express-mustache-overlays`
 * `DEBUG` - Include `express-mustache-overlays` to get debug output from the `express-mustache-overlays` library itself and `express-mustache-overlays:server` for messages from the example server.
+* `PORT` - Defaults to 80, but set it to something like 8000 if you want to run without needing `sudo`
 * `SCRIPT_NAME` - Where the app that uses this is located. The public files will be served from `${SCRIPT_NAME}/public` by default
 * `PUBLIC_URL_PATH` - the full URL path to the public files directory
 * `WITH_PJAX_PWA` - can be `"true"` if you want to enable progressive web app features for use with `gateway-lite` or `"false"` otherwise. Defaults to `"false"`. This affects the content of `views/partials/bodyEnd.mustache`
+* `OFFLINE_URL` - if using `WITH_PJAX_PWA`, this is the URL that will be fetched to use when there is no internet connection. The links to the scripts it needs to render correctly should be cached by the service worker that is installed.
+* `MANIFEST_URL` - if using `WITH_PJAX_PWA`, this is the URL to your `manifest.json` file
+* `SERVICE_WORKER_URL` - if using `WITH_PJAX_PWA`, this is the URL to your `sw.js` file
+* `ICON_192_URL` - the URL to a 192x192 PNG file to use as the icon
 
 Some of these can all be overriden when you set up mustache. For example:
 
@@ -99,10 +104,12 @@ MUSTACHE_DIRS=overlay DEBUG=express-mustache-overlays,express-mustache-overlays:
 
 Visit http://localhost:8000
 
-Example configuration:
+To use this as part of a PJAX progressive web app setup:
 
-* Same options as Library configuration described above plus...
-* `PORT` - Defaults to 80, but set it to something like 8000 if you want to run without needing `sudo`
+```
+MUSTACHE_DIRS=overlay DEBUG=express-mustache-overlays,express-mustache-overlays:server WITH_PJAX_PWA=true OFFLINE_URL="/offline" MANIFEST_URL="/public/theme/manifest.json" SERVICE_WORKER_URL="/sw.js" ICON_192_URL="/public/theme/icon192.png" PORT=8000 npm start
+```
+
 
 To run this behind an HTTPS proxy, you could install Gateway Lite (`npm install -g gateway-lite`), configure a self-signed HTTPS certificate and then add it to your OS keychain, then run:
 
@@ -118,6 +125,12 @@ npm run fix
 ```
 
 ## Changelog
+
+### 0.3.6 2019-01-12
+
+* Ensured `renderView()` gets all the variables from `app.locals`
+* Added `OFFLINE_URL`, `MANIFEST_URL`, `SERVICE_WORKER_URL` and `ICON_192_URL` config options
+* Refactored `top.mustache` as well as the scripts partials to use the new variables
 
 ### 0.3.5 2019-01-12
 
