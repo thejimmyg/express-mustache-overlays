@@ -1,9 +1,15 @@
 function updateOnlineStatus() {
-  document.getElementById("status").innerHTML = "";
+  var s = document.getElementById("status")
+  if (s) {
+    s.innerHTML = "";
+  }
 }
 
 function updateOfflineStatus() {
-  document.getElementById("status").innerHTML = "Offline";
+  var s = document.getElementById("status")
+  if (s) {
+    s.innerHTML = "Offline";
+  }
 }
 
 window.addEventListener('online',  updateOnlineStatus);
@@ -16,4 +22,5 @@ function checkOnlineStatus() {
     updateOfflineStatus()
   }
 }
+
 checkOnlineStatus()

@@ -126,6 +126,10 @@ npm run fix
 
 ## Changelog
 
+### 0.3.7 2019-01-12
+
+* Some more partials JS fixes **Caution: Note that `serviceWorkerUrl` and `offlineUrl` are not escaped in the template, so make sure `SERVICE_WORKER_URL` and `OFFLINE_URL` are trusted.**
+
 ### 0.3.6 2019-01-12
 
 * Ensured `renderView()` gets all the variables from `app.locals`

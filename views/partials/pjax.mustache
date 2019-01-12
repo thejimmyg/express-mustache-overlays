@@ -18,9 +18,9 @@ $(document).ready(function() {
   try {
     $.ajax({
       method: "GET",
-      // Should be a trusted string, so replaceing the / escaping should be safe
-      url: "{{offlineUrl}}".replace(/&#x2F;/g, '/'),
-      dataType: "text"
+      {{! Should be a trusted string, so skipping the escaping should be safe }}
+      url: "{{{offlineUrl}}}",
+      dataType: "text",
     }).done(install)
   } catch (e) {
     console.error('PJAX offline fetch error:', e)
