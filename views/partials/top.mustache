@@ -3,19 +3,19 @@
   <head>
     <meta charset="utf-8">
     <title>{{title}}</title>
-    <link rel="stylesheet" href="{{publicURLPath}}/theme/bootstrap.min.css">
-<script src="{{publicURLPath}}/theme/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-    <script src="{{publicURLPath}}/theme/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-    <script src="{{publicURLPath}}/theme/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{{publicUrlPath}}/theme/bootstrap.min.css">
+<script src="{{publicUrlPath}}/theme/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="{{publicUrlPath}}/theme/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="{{publicUrlPath}}/theme/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="no">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="theme-color" content="#000000" />
+    {{#themeColor}}<meta name="theme-color" content="{{themeColor}}">{{/themeColor}}
     {{#icon192Url}}<link rel="apple-touch-icon" href="{{icon192Url}}">{{/icon192Url}}
     {{#icon192Url}}<link rel="icon" sizes="192x192" href="{{icon192Url}}">{{/icon192Url}}
     {{#icon192Url}}<link rel="shortcut icon" type="image/png" href="{{icon192Url}}">{{/icon192Url}}
     {{#metaDescription}}<meta name="description" content="{{metaDescription}}">{{/metaDescription}}
-    {{#withPjaxPwa}}<script src="{{publicURLPath}}/theme/jquery-pjax-2.0.1.js" crossorigin="anonymous"></script>{{/withPjaxPwa}}
+    {{#withPjaxPwa}}<script src="{{publicUrlPath}}/theme/jquery-pjax-2.0.1.js" crossorigin="anonymous"></script>{{/withPjaxPwa}}
     {{#withPjaxPwa}}<meta name="mobile-web-app-capable" content="yes">{{/withPjaxPwa}}
     {{#withPjaxPwa}}<link rel="manifest" href="{{manifestUrl}}">{{/withPjaxPwa}}
   </head>

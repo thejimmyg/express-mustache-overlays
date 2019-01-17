@@ -25,6 +25,7 @@ Configuration environment variables for the example.
 * `MANIFEST_URL` - if using `WITH_PJAX_PWA`, this is the URL to your `manifest.json` file
 * `SERVICE_WORKER_URL` - if using `WITH_PJAX_PWA`, this is the URL to your `sw.js` file
 * `ICON_192_URL` - the URL to a 192x192 PNG file to use as the icon
+* `THEME_COLOR` - the color the browser should use for its theme
 
 There is also:
 
@@ -112,7 +113,7 @@ Visit http://localhost:8000
 To use this as part of a PJAX progressive web app setup:
 
 ```
-MUSTACHE_DIRS=overlay DEBUG=express-mustache-overlays,express-mustache-overlays:server WITH_PJAX_PWA=true OFFLINE_URL="/offline" MANIFEST_URL="/public/theme/manifest.json" SERVICE_WORKER_URL="/sw.js" ICON_192_URL="/public/theme/icon192.png" PORT=8000 npm start
+MUSTACHE_DIRS=overlay DEBUG=express-mustache-overlays,express-mustache-overlays:server WITH_PJAX_PWA=true NETWORK_ERROR_URL="/network-error" MANIFEST_URL="/public/theme/manifest.json" SERVICE_WORKER_URL="/sw.js" ICON_192_URL="/public/theme/icon192.png" THEME_COLOR="#000000" PORT=8000 npm start
 ```
 
 To run this behind an HTTPS proxy, you could install Gateway Lite (`npm install -g gateway-lite`), configure a self-signed HTTPS certificate and then add it to your OS keychain, then run:
@@ -130,6 +131,29 @@ npm run fix
 
 
 ## Changelog
+
+### 0.4.0
+
+Next:
+
+* Refactored to make the `overlays` object more useful, have more re-usable code in `lib/index.js` rather than in `bin/server.js`
+* Make a `sharedPublicUrlPath` which defaults to `publicUrlPath` ???
+* Make `networkError.mustache` and `start.mustache`
+* Make `/` optional, defaulting to not present
+* Add Dockerfile
+* Remove offline and start from edit
+* Upgrade gateway-lite
+
+Done:
+
+* Renamed `publicURLPath` to `publicUrlPath`
+* Renamed `offlineUrl` to `networkErrorUrl`, `OFFLINE_URL` to `NETWORK_ERROR_URL` and `/offline` to `/network-error`
+* Return of `renderFile`, `renderView` and `findView` from `overlays.setup()` is deprecated. Just use them as methods on `overlays` object.
+
+### 0.3.9 2019-01-12
+
+* Added `THEME_COLOR` environment variable
+* Added an `Install App` link which appears instead of Chrome Android automatically asking the user
 
 ### 0.3.8 2019-01-12
 
@@ -164,7 +188,6 @@ npm run fix
   * Add online/offline handlers as a partial
   * Create a `/start` URL that is used when the app starts.
   * By default the service worker install, uninstall, pjax and install prompt are all disabled in `views/partials/bodyEnd.mustache` with the use of the `!` (a mustache comment) in the partial includes.
-
 
 ### 0.3.4 2019-01-04
 
