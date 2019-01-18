@@ -14,21 +14,21 @@ $(document).ready(function() {
       return false;
     })
   }
-  {{#offlineUrl}}
+  {{#networkErrorUrl}}
   try {
     $.ajax({
       method: "GET",
       {{! Should be a trusted string, so skipping the escaping should be safe }}
-      url: "{{{offlineUrl}}}",
+      url: "{{{networkErrorUrl}}}",
       dataType: "text",
     }).done(install)
   } catch (e) {
     console.error('PJAX offline fetch error:', e)
     install('Offline')
   }
-  {{/offlineUrl}}
-  {{^offlineUrl}}
-    console.error('PJAX error - no offlineUrl specified')
+  {{/networkErrorUrl}}
+  {{^networkErrorUrl}}
+    console.error('PJAX error - no networkErrorUrl specified')
     install('Offline')
-  {{/offlineUrl}}
+  {{/networkErrorUrl}}
 })

@@ -31,6 +31,7 @@ There is also:
 
 * `DEBUG` - Include `express-mustache-overlays` to get debug output from the `express-mustache-overlays` library itself and `express-mustache-overlays:server` for messages from the example server.
 * `PORT` - Defaults to 80, but set it to something like 8000 if you want to run without needing `sudo`
+* `DEMO_ROUTES` - Adds `/', `/ok`, and `/throw` to the example
 
 Most apps that use this library will also use:
 
@@ -105,7 +106,7 @@ This example serves templates from `views` and partials from `views/partials`:
 
 ```
 npm install
-MUSTACHE_DIRS=overlay DEBUG=express-mustache-overlays,express-mustache-overlays:server PORT=8000 npm start
+DEMO_ROUTES=true MUSTACHE_DIRS=overlay DEBUG=express-mustache-overlays,express-mustache-overlays:server PORT=8000 npm start
 ```
 
 Visit http://localhost:8000
@@ -113,7 +114,7 @@ Visit http://localhost:8000
 To use this as part of a PJAX progressive web app setup:
 
 ```
-MUSTACHE_DIRS=overlay DEBUG=express-mustache-overlays,express-mustache-overlays:server WITH_PJAX_PWA=true NETWORK_ERROR_URL="/network-error" MANIFEST_URL="/public/theme/manifest.json" SERVICE_WORKER_URL="/sw.js" ICON_192_URL="/public/theme/icon192.png" THEME_COLOR="#000000" PORT=8000 npm start
+DEMO_ROUTES=true MUSTACHE_DIRS=overlay DEBUG=express-mustache-overlays,express-mustache-overlays:server WITH_PJAX_PWA=true NETWORK_ERROR_URL="/network-error" MANIFEST_URL="/public/theme/manifest.json" SERVICE_WORKER_URL="/sw.js" ICON_192_URL="/public/theme/icon192.png" THEME_COLOR="#000000" PORT=8000 npm start
 ```
 
 To run this behind an HTTPS proxy, you could install Gateway Lite (`npm install -g gateway-lite`), configure a self-signed HTTPS certificate and then add it to your OS keychain, then run:
@@ -136,19 +137,14 @@ npm run fix
 
 Next:
 
-* Refactored to make the `overlays` object more useful, have more re-usable code in `lib/index.js` rather than in `bin/server.js`
-* Make a `sharedPublicUrlPath` which defaults to `publicUrlPath` ???
-* Make `networkError.mustache` and `start.mustache`
-* Make `/` optional, defaulting to not present
-* Add Dockerfile
-* Remove offline and start from edit
 * Upgrade gateway-lite
-
-Done:
-
+* Add Dockerfile
+* Refactored to make the `overlays` object more useful, have more re-usable code in `lib/index.js` rather than in `bin/server.js`
 * Renamed `publicURLPath` to `publicUrlPath`
 * Renamed `offlineUrl` to `networkErrorUrl`, `OFFLINE_URL` to `NETWORK_ERROR_URL` and `/offline` to `/network-error`
 * Return of `renderFile`, `renderView` and `findView` from `overlays.setup()` is deprecated. Just use them as methods on `overlays` object.
+* Make `networkError.mustache` and `start.mustache`
+* Make `/`, `/ok` and `/throw`  optional, defaulting to not present, but enabled by setting the environment variable `DEMO_ROUTES=true`
 
 ### 0.3.9 2019-01-12
 

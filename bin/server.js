@@ -3,6 +3,8 @@ const compression = require('compression')
 const { overlaysApp, overlaysOptionsFromEnv, overlaysDirsFromEnv, prepareMustacheOverlays, setupErrorHandlers } = require('../lib/index.js')
 const debug = require('debug')('express-mustache-overlays:server')
 // const publicFilesDir = path.normalize(path.join(__dirname, '..', 'public'))
+const demoRoutes = (process.env.DEMO_ROUTES || 'false').toLowerCase() === 'true'
+const mustache = require('mustache')
 
 const main = async () => {
   const app = express()
@@ -28,15 +30,43 @@ const main = async () => {
     overlays.overlayPublicFilesDir(dir)
   })
 
-  // Simulate user signin
-  // (Use the withUser() middleware from express-mustache-jwt-signin to do this properly)
   app.use((req, res, next) => {
-    req.user = { username: 'james' }
-    res.locals = Object.assign({}, res.locals, { user: req.user })
+    res.locals = Object.assign({}, res.locals, { demoRoutes })
     next()
   })
 
-  app.use(scriptName, await overlaysApp(overlays, { debug }))
+  const oApp = await overlaysApp(overlays, { debug })
+
+  if (demoRoutes) {
+    oApp.get('/throw', async (req, res, next) => {
+      try {
+        throw new Error('Sample error')
+      } catch (e) {
+        next(e)
+      }
+    })
+
+    // Render the page, with the default title and request username as well as the content
+    oApp.get('/', async (req, res, next) => {
+      try {
+        const html = await overlays.renderView('content', { content: 'render()', metaDescription: 'Home page' })
+        res.render('content', { content: '<h1>Home</h1><p>Hello!</p><pre>' + mustache.escape(html) + '</pre>', metaDescription: 'Home page' })
+      } catch (e) {
+        next(e)
+      }
+    })
+
+    // Another page
+    oApp.get('/ok', async (req, res, next) => {
+      try {
+        res.render('content', { content: '<h1>OK</h1><p>OK!</p>', metaDescription: 'OK page' })
+      } catch (e) {
+        next(e)
+      }
+    })
+  }
+
+  app.use(scriptName, oApp)
 
   // Put the overlays into place after you've set up any more overlays you need, but definitely before the error handlers
   await overlays.setup({ debug })
