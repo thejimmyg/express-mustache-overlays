@@ -134,6 +134,10 @@ npm run fix
 
 ## Changelog
 
+### 0.4.1 2019-01-18
+
+* Added `SIGTERM` and `SIGNINT` handlers
+
 ### 0.4.0 2019-01-18
 
 * Add Dockerfile
