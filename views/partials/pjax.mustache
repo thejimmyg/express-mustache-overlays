@@ -28,7 +28,7 @@ $(document).ready(function() {
   }
   {{/networkErrorUrl}}
   {{^networkErrorUrl}}
-    console.error('PJAX error - no networkErrorUrl specified')
-    install('Offline')
+  console.error('withPjaxPwa is enabled, but no networkErrorUrl is specified so using the string "Offline" to display when the browser is offline.')
+  install('Offline')
   {{/networkErrorUrl}}
 })

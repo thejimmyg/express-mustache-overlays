@@ -19,7 +19,8 @@ In `public/theme` you'll find a `manifest.json` file and `icon.png` that you'll 
 Configuration environment variables for the example.
 
 * `SCRIPT_NAME` - Where the app that uses this is located. The public files will be served from `${SCRIPT_NAME}/public` by default
-* `PUBLIC_URL_PATH` - the full URL path to the public files directory
+* `PUBLIC_URL_PATH` - the full URL path to the `public` files directory
+* `SHARED_PUBLIC_URL_PATH` - the full URL path to a URL that serves other public files the pages need, but that aren't served by this server. This could be a Content Delivery Network URL, or a specialised static file server for example. The idea is that multiple servers might use the same files at this shared URL.
 * `WITH_PJAX_PWA` - can be `"true"` if you want to enable progressive web app features for use with `gateway-lite` or `"false"` otherwise. Defaults to `"false"`. This affects the content of `views/partials/bodyEnd.mustache`
 * `OFFLINE_URL` - if using `WITH_PJAX_PWA`, this is the URL that will be fetched to use when there is no internet connection. The links to the scripts it needs to render correctly should be cached by the service worker that is installed.
 * `MANIFEST_URL` - if using `WITH_PJAX_PWA`, this is the URL to your `manifest.json` file
@@ -133,14 +134,12 @@ npm run fix
 
 ## Changelog
 
-### 0.4.0
+### 0.4.0 2019-01-18
 
-Next:
-
-* Upgrade gateway-lite
 * Add Dockerfile
 * Refactored to make the `overlays` object more useful, have more re-usable code in `lib/index.js` rather than in `bin/server.js`
 * Renamed `publicURLPath` to `publicUrlPath`
+* Added `sharedPublicURLPath` and used it to replace `publicUrlPath` in default templates
 * Renamed `offlineUrl` to `networkErrorUrl`, `OFFLINE_URL` to `NETWORK_ERROR_URL` and `/offline` to `/network-error`
 * Return of `renderFile`, `renderView` and `findView` from `overlays.setup()` is deprecated. Just use them as methods on `overlays` object.
 * Make `networkError.mustache` and `start.mustache`
