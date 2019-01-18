@@ -65,7 +65,7 @@ const main = async () => {
       }
     })
   }
-
+  debug('Mounting overlays app at', scriptName)
   app.use(scriptName, oApp)
 
   // Put the overlays into place after you've set up any more overlays you need, but definitely before the error handlers
