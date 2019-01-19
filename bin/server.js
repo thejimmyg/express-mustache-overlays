@@ -10,7 +10,6 @@ const main = async () => {
   const app = express()
   app.use(compression())
 
-  const title = process.env.TITLE || 'Express Mustache Overlays'
   const port = process.env.PORT || 80
 
   const overlaysOptions = overlaysOptionsFromEnv()
@@ -19,7 +18,6 @@ const main = async () => {
   const { mustacheDirs, publicFilesDirs } = overlaysDirsFromEnv()
 
   overlaysOptions.expressStaticOptions = {}
-  overlaysOptions.title = title
 
   const overlays = await prepareMustacheOverlays(app, overlaysOptions)
 

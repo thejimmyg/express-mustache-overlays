@@ -27,6 +27,7 @@ Configuration environment variables for the example.
 * `SERVICE_WORKER_URL` - if using `WITH_PJAX_PWA`, this is the URL to your `sw.js` file
 * `ICON_192_URL` - the URL to a 192x192 PNG file to use as the icon
 * `THEME_COLOR` - the color the browser should use for its theme
+* `DEFAULT_TITLE` - the default title to use for pages
 
 There is also:
 
@@ -52,14 +53,11 @@ const overlaysOptions = overlaysOptionsFromEnv()
 const { scriptName, publicURLPath } = overlaysOptions
 const { mustacheDirs, publicFilesDirs } = overlaysDirsFromEnv()
 
-const title = process.env.TITLE || 'Express Mustache Overlays'
-
 const main = async () => {
   const app = express()
   const port = process.env.PORT || 80
 
   overlaysOptions.expressStaticOptions = {}
-  overlaysOptions.title = title
   const overlays = await prepareMustacheOverlays(app, overlaysOptions)
 
   // Simulate user signin
@@ -115,7 +113,7 @@ Visit http://localhost:8000
 To use this as part of a PJAX progressive web app setup:
 
 ```
-DEMO_ROUTES=true MUSTACHE_DIRS=overlay DEBUG=express-mustache-overlays,express-mustache-overlays:server WITH_PJAX_PWA=true NETWORK_ERROR_URL="/network-error" MANIFEST_URL="/public/theme/manifest.json" SERVICE_WORKER_URL="/sw.js" ICON_192_URL="/public/theme/icon192.png" THEME_COLOR="#000000" PORT=8000 npm start
+DEMO_ROUTES=true MUSTACHE_DIRS=overlay DEFAULT_TITLE='Express Mustache Overlays' DEBUG=express-mustache-overlays,express-mustache-overlays:server WITH_PJAX_PWA=true NETWORK_ERROR_URL="/network-error" MANIFEST_URL="/public/theme/manifest.json" SERVICE_WORKER_URL="/sw.js" ICON_192_URL="/public/theme/icon192.png" THEME_COLOR="#000000" PORT=8000 npm start
 ```
 
 To run this behind an HTTPS proxy, you could install Gateway Lite (`npm install -g gateway-lite`), configure a self-signed HTTPS certificate and then add it to your OS keychain, then run:
@@ -133,6 +131,11 @@ npm run fix
 
 
 ## Changelog
+
+### 0.4.2 2019-01-19
+
+* Added `DEFAULT_TITLE` environment variable which sets the `title` option
+* Set a debug error message if the template rendering fails
 
 ### 0.4.1 2019-01-18
 
