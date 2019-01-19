@@ -132,6 +132,10 @@ npm run fix
 
 ## Changelog
 
+### 0.4.3 2019-01-19
+
+* Added a `pjaxHandlers.mustache` partial
+
 ### 0.4.2 2019-01-19
 
 * Added `DEFAULT_TITLE` environment variable which sets the `title` option
