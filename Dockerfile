@@ -11,9 +11,9 @@ FROM base
 
 COPY --from=builder /app /app
 COPY bin/ /app/bin/
-COPY views/ /app/views/
 COPY lib/ /app/lib/
 COPY public/ /app/public/
+COPY views/ /app/views/
 WORKDIR /app
 EXPOSE 80
 ENV NODE_PATH=/app/node_modules

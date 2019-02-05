@@ -12,6 +12,7 @@
     "start": "node bin/server.js"
   },
   "author": "JimmyG",
+  "main": "lib/index.js",
   "license": "MIT",
   "dependencies": {
     "chokidar": "^2.0.4",

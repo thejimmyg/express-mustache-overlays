@@ -5,10 +5,12 @@ $(document).ready(function() {
     $(document).on('pjax:error', function(event, xhr, textStatus, errorThrown, options) {
       console.log('Handling pjax error page response without a hard refresh ...')
       if (xhr.responseText) {
+        console.log('Got response', xhr.responseText.slice(0, 100), '...');
         options.success(xhr.responseText, textStatus, xhr);
       } else {
+        console.log('No response. Using offline text', offlineText.slice(0, 100), '...');
         options.success(offlineText, 'error', xhr);
-        event.preventDefault()
+        event.preventDefault();
       }
       setTimeout(checkOnlineStatus, 200)
       return false;
@@ -28,7 +30,7 @@ $(document).ready(function() {
   }
   {{/networkErrorUrl}}
   {{^networkErrorUrl}}
-  console.error('withPjaxPwa is enabled, but no networkErrorUrl is specified so using the string "Offline" to display when the browser is offline.')
+  console.info('withPjaxPwa is enabled, but no networkErrorUrl is specified so using the string "Offline" to display when the browser is offline.')
   install('Offline')
   {{/networkErrorUrl}}
 })

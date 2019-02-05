@@ -105,7 +105,7 @@ This example serves templates from `views` and partials from `views/partials`:
 
 ```
 npm install
-DEMO_ROUTES=true MUSTACHE_DIRS=overlay DEBUG=express-mustache-overlays,express-mustache-overlays:server PORT=8000 npm start
+DEMO_ROUTES=true MUSTACHE_DIRS=overlay DEBUG=express-mustache-overlays,express-mustache-overlays:server PORT=8000 WITH_PJAX_PWA=true npm start
 ```
 
 Visit http://localhost:8000
