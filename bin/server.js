@@ -1,45 +1,30 @@
-// DEMO_ROUTES=true MUSTACHE_DIRS=overlay DEBUG=express-mustache-overlays,express-mustache-overlays:server PORT=8000 DEFAULT_TITLE=Hello npm start
-
-const { expressMustacheOverlays } = require('../index.js')
 const express = require('express')
-const mustache = require('mustache')
+const path = require('path')
 const debug = require('debug')('express-mustache-overlays:server')
+const { prepareMustache, setupMustache, mustacheFromEnv } = require('../index.js')
 
 const app = express()
-app.locals.demoRoutes = (process.env.DEMO_ROUTES || 'false').toLowerCase() === 'true'
 app.locals.debug = debug
+const userDirs = mustacheFromEnv(app)
+const libDirs = []
+prepareMustache(app, userDirs, libDirs)
 
-expressMustacheOverlays(app, {}, () => {
-  const { scriptName } = app.locals
+// Any other express setup can change app.locals.mustache.libDirs here to add
+// additional library-defined public files directories to be served.  Any user
+// defined directories will be prepended before any corresponding URL path in
+// the library directories list. The safest way to add overlays is with the 
+// overlay() function demonstrated here.
+app.locals.mustache.overlay([path.join(__dirname, 'mustache')])
 
-  if (app.locals.demoRoutes) {
-    app.get(scriptName + '/throw', async (req, res, next) => {
-      try {
-        throw new Error('Sample error')
-      } catch (e) {
-        next(e)
-      }
-    })
-
-    // Render the page, with the default title and request username as well as the content
-    app.get(scriptName + '/', async (req, res, next) => {
-      try {
-        const html = await (await app.locals.overlaysPromise).renderView('content', { content: 'render()', metaDescription: 'Home page' })
-        res.render('content', { content: '<h1>Home</h1><p>Hello!</p><pre>' + mustache.escape(html) + '</pre>', metaDescription: 'Home page' })
-      } catch (e) {
-        next(e)
-      }
-    })
-
-    // Another page
-    app.get(scriptName + '/ok', async (req, res, next) => {
-      try {
-        res.render('content', { content: '<h1>OK</h1><p>OK!</p>', metaDescription: 'OK page' })
-      } catch (e) {
-        next(e)
-      }
-    })
-  }
-
-  app.listen(app.locals.port, () => console.log(`Example app listening on port ${app.locals.port}`))
+// Add any routes here:
+app.get('', (req, res) => {
+  res.render('hello', {})
 })
+
+// Set up the engine
+const mustacheEngine = setupMustache(app)
+app.engine('mustache', mustacheEngine)
+app.set('views', app.locals.mustache.dirs)
+app.set('view engine', 'mustache')
+
+app.listen(8000, () => console.log(`Example app listening on port 8000`))
