@@ -42,7 +42,6 @@ The `overlays` object from the promise has these methods:
 * `findView(template)` - async function (requires `await` when called) which resolves to the path on the filesystem of the view
 * `renderView(template, options)` - async function (requires `await` when called) which resolves to the template named `template`, rendered with `options`. E.g. `const html = await renderView('content', {content: 'hello'})`
 * `renderFile(path, options)` - async function (requires `await` when called) which resolves takes the `path` as the full path to the mustache template, and the same `options` as `renderView()`.
-```
 
 ## Example
 
