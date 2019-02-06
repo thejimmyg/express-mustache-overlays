@@ -61,4 +61,4 @@ npm run "docker:push"
 
 ### 0.5.0 2019-02-06
 
-* Complete refactor. See old `CHANGELOG.md` for older changes.
+* Complete refactor. See old `CHANGELOG.md` for older changes. Removed all functionality apart from the overlays behaviour. See `express-public-files-overlays` for static file serving.
