@@ -1,258 +1,82 @@
 # Express Mustache Overlays
 
-Some key features of this particular [Express](https://expressjs.com) and [Mustache](https://mustache.github.io) integration:
+Serves mustache templates and partials, checking each directory in turn for matches, and reloading on file changes.
 
-* Loads partials from a `partials` subdirectory of a view directory and made available to the template based on their name (e.g. `partials/top.mustache` can be used as `{{>top}}`)
-* Reloads views or partials when you make a change
-* Searches in a series of view directories in turn for each template or partial, effectively allowing you to *overlay* one view directory on another
-* Demonstrates how to use template defaults that can also take information from the Express request
-* Can also be used to overlay public static files required by the views and partials
-* Provides a basic Bootstrap Flex layout, `400`, `500` and `content` templates and `top` and `bottom` partials
-* Sets `publicURLPath`, `scriptName`, and `title` on `app.locals` (and `res.locals` for access by views during requests)
-
-## Customize
-
-In `public/theme` you'll find a `manifest.json` file and `icon.png` that you'll want to override in your own public overlay.
 
 ## Configuration
 
 Configuration environment variables for the example.
 
-* `SCRIPT_NAME` - Where the app that uses this is located. The public files will be served from `${SCRIPT_NAME}/public` by default
-* `PUBLIC_URL_PATH` - the full URL path to the `public` files directory
-* `SHARED_PUBLIC_URL_PATH` - the full URL path to a URL that serves other public files the pages need, but that aren't served by this server. This could be a Content Delivery Network URL, or a specialised static file server for example. The idea is that multiple servers might use the same files at this shared URL.
-* `WITH_PJAX_PWA` - can be `"true"` if you want to enable progressive web app features for use with `gateway-lite` or `"false"` otherwise. Defaults to `"false"`. This affects the content of `views/partials/bodyEnd.mustache`
-* `OFFLINE_URL` - if using `WITH_PJAX_PWA`, this is the URL that will be fetched to use when there is no internet connection. The links to the scripts it needs to render correctly should be cached by the service worker that is installed.
-* `MANIFEST_URL` - if using `WITH_PJAX_PWA`, this is the URL to your `manifest.json` file
-* `SERVICE_WORKER_URL` - if using `WITH_PJAX_PWA`, this is the URL to your `sw.js` file
-* `ICON_192_URL` - the URL to a 192x192 PNG file to use as the icon
-* `THEME_COLOR` - the color the browser should use for its theme
-* `DEFAULT_TITLE` - the default title to use for pages
+* `MUSTACHE_DIRS` - A `:`-separated list of directories to check for templates e.g. `mustache-overlay:mustache`.
 
-There is also:
+**Any configuration from `MUSTACHE_DIRS` gets merged into existing configuration such that it is used in preference to it. Effecrtively, the `MUSTACHE_DIRS` settings override settings defined in code.**
+
+Additionally:
 
 * `DEBUG` - Include `express-mustache-overlays` to get debug output from the `express-mustache-overlays` library itself and `express-mustache-overlays:server` for messages from the example server.
-* `PORT` - Defaults to 80, but set it to something like 8000 if you want to run without needing `sudo`
-* `DEMO_ROUTES` - Adds `/', `/ok`, and `/throw` to the example
 
-Most apps that use this library will also use:
 
-* `MUSTACHE_DIRS` - A `:` separated list of directories to overlay on top of the default views provided by `express-mustache-overlays`
-* `PUBLIC_FILE_DIRS` - A `:` separated list of directories to overlay on top of the default publis static files provided by `express-mustache-overlays`
+## Internal Workings
 
-There is also `publicURLPath` option that allows you to specify the full path that the public files directories should be hosted at. `publicURLPath` is NOT relative to `SCRIPT_NAME` so you need to set it carefully if you don't like the default. And there is `expressStaticOptions` which is passed directly to `express.static` as its second parameter in case you want to configure express.
+Internally, the code is designed to work in these stages:
 
-Here's the code of the example that makes use of this:
+* `mustacheFromEnv(app)` - Parses and returns the config from the `MUSTACHE_DIRS` environment variable
+* `prepareMustache(app, userDirs, libDirs)` - Sets up the `app.locals.mustache` data structure and makes `app.locals.mustache.overlay()` available (see next). `userDirs` and `libDirs` are optional. You usually pass the output of `mustacheFilesFromEnv(app)` as the `userDirs` variable and any mustache files directoires your library needs as the `libDirs` setting.
+* `app.locals.mustache.overlay(dirs)` - A function other libraries can use to merge any overlays they need into the `libDirs` configuration. The `userDirs` configuration will always overlay over the `libDirs` configuration, even if it is set up earlier.
+* `setupMustache(app)` - Installs the middleware based on the settings in `app.locals.mustache`. This should always come last.
+
+### Accessing the Overlays Object
+
+You can access the overlays object like this once `prepareMustache()` is called:
 
 ```
-const debug = require('debug')('express-mustache-overlays:server')
-const express = require('express')
-const { overlaysOptionsFromEnv, overlaysDirsFromEnv, prepareMustacheOverlays, setupErrorHandlers } = require('express-mustache-overlays')
-
-const overlaysOptions = overlaysOptionsFromEnv()
-const { scriptName, publicURLPath } = overlaysOptions
-const { mustacheDirs, publicFilesDirs } = overlaysDirsFromEnv()
-
-const main = async () => {
-  const app = express()
-  const port = process.env.PORT || 80
-
-  overlaysOptions.expressStaticOptions = {}
-  const overlays = await prepareMustacheOverlays(app, overlaysOptions)
-
-  // Simulate user signin
-  // (Use the withUser() middleware from express-mustache-jwt-signin to do this properly)
-  app.use((req, res, next) => {
-    req.user = { username: 'james' }
-    res.locals = Object.assign({}, res.locals, { user: req.user })
-    next()
-  })
-
-  // Set up any other overlays directories here
-  mustacheDirs.forEach(dir => {
-    overlays.overlayMustacheDir(dir)
-  })
-  publicFilesDirs.forEach(dir => {
-    overlays.overlayPublicFilesDir(dir)
-  })
-
-  // Render the page, with the default title and request username as well as the content
-  app.get('/', (req, res) => {
-    res.render('content', { content: '<h1>Home</h1><p>Hello!</p>' })
-  })
-
-  // Put the overlays into place after you've set up any more overlays you need, but definitely before the error handlers
-  // Pass the debug logger you want to be used for any error messages
-  await overlays.setup({ debug })
-
-  // Keep this right at the end, immediately before listening
-  setupErrorHandlers(app, { debug })
-  app.listen(port, () => console.log(`Example app listening on port ${port}`))
-}
-
-main()
+app.locals.mustache.overlaysPromise.then((overlays) => {
+  // Use overlays here
+})
 ```
 
-## Error handling
+Ordinarily you wouldn't need this, but the object can be useful if you want to use the template system outside of Express.
 
-Make sure you pass an optional `debug` function to `setupErrorHandlers(app, {debug})` in a third party app, since otherwise the traceback will be logged under `express-mustache-overlays` rather than whatever name is the default in your other project. If this is what you want, just make sure you set `DEBUG=express-mustache-overlays` when running your app so that messages from your app appear in the log output.
+The `overlays` object from the promise has these methods:
 
-There is a `/throw` endpoint in the sample server so you can test this behaviour.
+* `findView(template)` - async function (requires `await` when called) which resolves to the path on the filesystem of the view
+* `renderView(template, options)` - async function (requires `await` when called) which resolves to the template named `template`, rendered with `options`. E.g. `const html = await renderView('content', {content: 'hello'})`
+* `renderFile(path, options)` - async function (requires `await` when called) which resolves takes the `path` as the full path to the mustache template, and the same `options` as `renderView()`.
+```
 
 ## Example
 
-This example serves templates from `views` and partials from `views/partials`:
-
 ```
-npm install
-DEMO_ROUTES=true MUSTACHE_DIRS=overlay DEBUG=express-mustache-overlays,express-mustache-overlays:server PORT=8000 npm start
+DEBUG="express-mustache-overlays,express-mustache-overlays:server" npm start
 ```
 
-Visit http://localhost:8000
+Visit http://localhost:8000/ and you'll see `Hello world!` served from `./bin/mustache/hello.mustache` and `./bin/mustache/partials/world.mustache`.
 
-To use this as part of a PJAX progressive web app setup:
+If you specify `MUSTACHE_DIRS` too, the directories specified will be used in preference.
 
-```
-DEMO_ROUTES=true MUSTACHE_DIRS=overlay DEFAULT_TITLE='Express Mustache Overlays' DEBUG=express-mustache-overlays,express-mustache-overlays:server WITH_PJAX_PWA=true NETWORK_ERROR_URL="/network-error" MANIFEST_URL="/public/theme/manifest.json" SERVICE_WORKER_URL="/sw.js" ICON_192_URL="/public/theme/icon192.png" THEME_COLOR="#000000" PORT=8000 npm start
-```
-
-To run this behind an HTTPS proxy, you could install Gateway Lite (`npm install -g gateway-lite`), configure a self-signed HTTPS certificate and then add it to your OS keychain, then run:
+In the next example, templates will first be searched for in `./bin/mustache` and then be searched for in `./bin/mustache-overlay`. You can try moving or deleting the files in those directories to see the behaviour in action:
 
 ```
-DEBUG=gateway-lite gateway-lite --https-port 443 --port 80 --cert domain/www.example.localhost/sni/cert.pem --key domain/www.example.localhost/sni/key.pem --domain domain --user='{"www.example.localhost": {"hello": "eyJoYXNoIjoiU2xkK2RwOGx3cFM1WDJzTHlnTUxmOXhNTlZ5NHV5UjZwK3pQTGhNLzJqMVRlRTF5Q1AxbURzQkpvSTFKRlBSd3V1akIrcng0aDhxNlJBNXRuRVlWUVNpWiIsInNhbHQiOiIwU3NIZnJDMEY1OUZZQmhHSnRKb2QvN3NMTzh3Um82Wm5mTnl6VThIeHYyV2FrdWd6dDhZc09nSDJwUHBiMnAxQlczU1BTWDN5L29GczlaN1NqTktpc2h3Iiwia2V5TGVuZ3RoIjo2NiwiaGFzaE1ldGhvZCI6InBia2RmMiIsIml0ZXJhdGlvbnMiOjcyNjIzfQ=="}}' --proxy='{"www.example.localhost": [["/", "localhost:8000/", {"auth": false}]]}' --redirect='{"www.example.localhost": {"/some-path": "/"}}'  --pwa='{"www.example.localhost": {}}'
+DEBUG="express-mustache-overlays,express-mustache-overlays:server" MUSTACHE_DIRS="./bin/mustache-overlay" npm start
 ```
+
+Visit http://localhost:8000/ this time and you'll see `Goodbye world!` with the `hello.mustache` template served from `./bin/mustache-overlay/hello.mustache` but the `world.mustache` partial coming from `./bin/mustache/partials`.
+
+If you delete, move or change files, the overlays will automatically reflect your changes so free free to experiment.
 
 
 ## Dev
 
 ```
 npm run fix
+npm run "docker:build"
+npm run "docker:run"
+npm run "docker:push"
 ```
 
 
 ## Changelog
 
-### 0.4.3 2019-01-19
+### 0.5.0 2019-02-06
 
-* Added a `pjaxHandlers.mustache` partial
-
-### 0.4.2 2019-01-19
-
-* Added `DEFAULT_TITLE` environment variable which sets the `title` option
-* Set a debug error message if the template rendering fails
-
-### 0.4.1 2019-01-18
-
-* Added `SIGTERM` and `SIGNINT` handlers
-
-### 0.4.0 2019-01-18
-
-* Add Dockerfile
-* Refactored to make the `overlays` object more useful, have more re-usable code in `lib/index.js` rather than in `bin/server.js`
-* Renamed `publicURLPath` to `publicUrlPath`
-* Added `sharedPublicURLPath` and used it to replace `publicUrlPath` in default templates
-* Renamed `offlineUrl` to `networkErrorUrl`, `OFFLINE_URL` to `NETWORK_ERROR_URL` and `/offline` to `/network-error`
-* Return of `renderFile`, `renderView` and `findView` from `overlays.setup()` is deprecated. Just use them as methods on `overlays` object.
-* Make `networkError.mustache` and `start.mustache`
-* Make `/`, `/ok` and `/throw`  optional, defaulting to not present, but enabled by setting the environment variable `DEMO_ROUTES=true`
-
-### 0.3.9 2019-01-12
-
-* Added `THEME_COLOR` environment variable
-* Added an `Install App` link which appears instead of Chrome Android automatically asking the user
-
-### 0.3.8 2019-01-12
-
-* Added `overlaysOptionsFromEnv()` function to parse all the overlays options that can be specified as environment variables.
-* Added `overlaysDirsFromEnv()` function to parse the `MUSTACHE_OVERLAYS_DIRS` and `PUBLIC_FILES_DIRS` environment variables.
-
-### 0.3.7 2019-01-12
-
-* Some more partials JS fixes **Caution: Note that `serviceWorkerUrl` and `offlineUrl` are not escaped in the template, so make sure `SERVICE_WORKER_URL` and `OFFLINE_URL` are trusted.**
-
-### 0.3.6 2019-01-12
-
-* Ensured `renderView()` gets all the variables from `app.locals`
-* Added `OFFLINE_URL`, `MANIFEST_URL`, `SERVICE_WORKER_URL` and `ICON_192_URL` config options
-* Refactored `top.mustache` as well as the scripts partials to use the new variables
-
-### 0.3.5 2019-01-12
-
-* Made the default template behave as a single page app using PJAX and a service worker, and added URLs that are needed to serve this as a progressive web app via `gateway-lite`
-  * Added a wrapper `pjax-container` to the entire body of the template
-  * Changed from jQuery slim to normal jQuery
-  * Introduced jQuery PJAX so that full page reloads aren't required as you navigate, instead the `<div id="pjax-container">` content is replaced into the existing div. **Caution: This means extra infomtation in the `<head>` or reloaded outside `<div id="pjax-container">` will not be loaded
-  * Added PJAX initialisation that installs a `pjax:error` handler which inserts a simple you are offline message
-  * Added a `/offline` route to `bin/server.js` to generate a simple offline message page
-  * Changed `<meta name="apple-mobile-web-app-capable" content="yes">` to `no` since apple still doesn't handle PWAs very well (cookies are lost as users switch to a different app and back).
-  * Removed `manifest.json` and the icons as they can now be served by gateway-lite instead
-  * WONT Support PJAX container-only HTML responses - makes the cacheing of the responses by service worker more complex.
-  * Changed partial structure so that there are more overrides possible
-  * Added gzip compresssion to the example
-  * Setting the `metaDescription` local to a string results in a meta description tag being added for SEO
-  * Make the PJAX offline message the same as the one in the service worker cache by fetching that page with an AJAX call.
-  * Add online/offline handlers as a partial
-  * Create a `/start` URL that is used when the app starts.
-  * By default the service worker install, uninstall, pjax and install prompt are all disabled in `views/partials/bodyEnd.mustache` with the use of the `!` (a mustache comment) in the partial includes.
-
-### 0.3.4 2019-01-04
-
-* Added a `options` to `setupErrorHandlers()` to allow `debug` to optionally be passed to the error handlers. This means errors from an app will be logged with the apps they come from, rather than from `express-mustache-overlays`.
-
-### 0.3.3 2018-12-29
-
-* Return `{renderFile, findView, renderView}` from `setup()`, not just the `renderFile` function. The new `renderView` function will resolve the correct template file based on its name (just like calls to `res.render()` so that you don't need to do the looking up yourself.
-* Added missing `debug` import in `bin/server.js`
-
-### 0.3.2 2018-12-29
-
-* Wrapped the content in the `views/content.mustache` template in an `<article>` tag.
-
-### 0.3.1 2018-12-29
-
-* `overlays.setup()` now returns a `render(path, options)` method that can also be used outside the Express context
-
-### 0.3.0 2018-12-21
-
-* Split `setupMustacheOverlays(...)` into `const overlays = prepareMustacheOverlays(...)` and `overlays.setup()`
-* Refactored to use `app.locals` for `title`, `publicURLPath` and `scriptName`
-* Shortened the watch throttle timeout on changed partials from 500ms to 200ms
-* Prevented partials reload events happening on initial load
-* Added error checking from shelljs command
-
-### 0.2.2 2018-12-20
-
-* Changed the way environment variables are handled internally. They are used in `bin` but not in `lib` now.
-
-### 0.2.1 2018-12-20
-
-* Removed 403 template. Makes more sense in `express-mustache-jwt-signin`
-* Refactored `bottom.mustache` to use `footer.mustache`
-
-### 0.2.0 2018-12-20
-
-* Refactored to support public files too as well as to host 400, 403 and 500 pages
-
-### 0.1.4 2018-12-15
-
-* Tweaked example to set from `MUSTACHE_DIRS` correctly
-
-### 0.1.3 2018-12-15
-
-* Support the `MUSTACHE_DIRS` environment variable as a `:` separated list of paths to look at first before looking in the default `views` directory
-* Listen to `all` events in partials such as add and delete as well as change
-* Improved logging of which partials directory is being reloaded
-* Throttle reloading with `lodash._throttle` and support sub directories
-
-### 0.1.2 2018-12-15
-
-* Throw an error if `mustacheDirs` is not an array
-* Use Flex-based templates in the example
-
-### 0.1.1
-
-* Reload on change
-
-### 0.1.0
-
-* First version
+* Complete refactor. See old `CHANGELOG.md` for older changes. Removed all functionality apart from the overlays behaviour. See `express-public-files-overlays` for static file serving.
