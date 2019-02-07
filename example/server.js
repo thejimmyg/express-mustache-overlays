@@ -1,18 +1,14 @@
 const express = require('express')
 const path = require('path')
-const debug = require('debug')('express-mustache-overlays:server')
-const { prepareMustache, setupMustache, mustacheFromEnv } = require('../index.js')
+const { prepareMustache, setupMustache, mustacheFromEnv } = require('express-mustache-overlays')
 
 const app = express()
-app.locals.debug = debug
-const userDirs = mustacheFromEnv(app)
-const libDirs = []
-prepareMustache(app, userDirs, libDirs)
+prepareMustache(app, mustacheFromEnv(app))
 
 // Any other express setup can change app.locals.mustache.libDirs here to add
 // additional library-defined public files directories to be served.  Any user
 // defined directories will be prepended before any corresponding URL path in
-// the library directories list. The safest way to add overlays is with the 
+// the library directories list. The safest way to add overlays is with the
 // overlay() function demonstrated here.
 app.locals.mustache.overlay([path.join(__dirname, 'mustache')])
 

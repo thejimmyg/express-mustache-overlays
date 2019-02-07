@@ -5,6 +5,8 @@ Serves mustache templates and partials, checking each directory in turn for matc
 
 ## Configuration
 
+The components in this package make use of the `app.locals.mustache` namespace. The `prepareMustache()` function helps set up the data structure correctly.
+
 Configuration environment variables for the example.
 
 * `MUSTACHE_DIRS` - A `:`-separated list of directories to check for templates e.g. `mustache-overlay:mustache`.
@@ -13,7 +15,7 @@ Configuration environment variables for the example.
 
 Additionally:
 
-* `DEBUG` - Include `express-mustache-overlays` to get debug output from the `express-mustache-overlays` library itself and `express-mustache-overlays:server` for messages from the example server.
+* `DEBUG` - Include `express-mustache-overlays` to get debug output from the `express-mustache-overlays` library itself and `express-mustache-overlays:server` for messages from the example server. Also include `express-public-files-overlays` to get debug from the public files server in the example.
 
 
 ## Internal Workings
@@ -43,26 +45,48 @@ The `overlays` object from the promise has these methods:
 * `renderView(template, options)` - async function (requires `await` when called) which resolves to the template named `template`, rendered with `options`. E.g. `const html = await renderView('content', {content: 'hello'})`
 * `renderFile(path, options)` - async function (requires `await` when called) which resolves takes the `path` as the full path to the mustache template, and the same `options` as `renderView()`.
 
+
 ## Example
 
 ```
-DEBUG="express-mustache-overlays,express-mustache-overlays:server" npm start
+const express = require('express')
+const path = require('path')
+const { prepareMustache, setupMustache, mustacheFromEnv } = require('../index.js')
+
+const app = express()
+prepareMustache(app, mustacheFromEnv(app))
+
+// Any other express setup can change app.locals.mustache.libDirs here to add
+// additional library-defined public files directories to be served.  Any user
+// defined directories will be prepended before any corresponding URL path in
+// the library directories list. The safest way to add overlays is with the
+// overlay() function demonstrated here.
+app.locals.mustache.overlay([path.join(__dirname, 'mustache')])
+
+// Add any routes here:
+app.get('', (req, res) => {
+  res.render('hello', {})
+})
+
+// Set up the engine
+const mustacheEngine = setupMustache(app)
+app.engine('mustache', mustacheEngine)
+app.set('views', app.locals.mustache.dirs)
+app.set('view engine', 'mustache')
+
+app.listen(8000, () => console.log(`Example app listening on port 8000`))
 ```
 
-Visit http://localhost:8000/ and you'll see `Hello world!` served from `./bin/mustache/hello.mustache` and `./bin/mustache/partials/world.mustache`.
+The `mustache` directory contains a `hello.mustache` template.
 
-If you specify `MUSTACHE_DIRS` too, the directories specified will be used in preference.
-
-In the next example, templates will first be searched for in `./bin/mustache` and then be searched for in `./bin/mustache-overlay`. You can try moving or deleting the files in those directories to see the behaviour in action:
+See the `./example` directory for an example.
 
 ```
-DEBUG="express-mustache-overlays,express-mustache-overlays:server" MUSTACHE_DIRS="./bin/mustache-overlay" npm start
+cd example
+npm install
 ```
 
-Visit http://localhost:8000/ this time and you'll see `Goodbye world!` with the `hello.mustache` template served from `./bin/mustache-overlay/hello.mustache` but the `world.mustache` partial coming from `./bin/mustache/partials`.
-
-If you delete, move or change files, the overlays will automatically reflect your changes so free free to experiment.
-
+Then follow the instructions in the `README.md` in the `example` directory.
 
 ## Dev
 
@@ -75,6 +99,11 @@ npm run "docker:push"
 
 
 ## Changelog
+
+### 0.5.1 2019-02-07
+
+* Changed debug behaviour to use own `debug()`, not `app.locals.debug()`.
+* Moved the example to `./example`.
 
 ### 0.5.0 2019-02-06
 

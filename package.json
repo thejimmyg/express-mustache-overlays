@@ -1,23 +1,20 @@
 {
   "name": "express-mustache-overlays",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Multiple mustache template directories with partials for express 4",
   "scripts": {
-    "docker:build": "docker build . -t thejimmyg/express-mustache-overlays:0.5.0",
-    "docker:push": "docker push thejimmyg/express-mustache-overlays:0.5.0",
+    "docker:build": "docker build . -t thejimmyg/express-mustache-overlays:0.5.1",
+    "docker:push": "docker push thejimmyg/express-mustache-overlays:0.5.1",
     "docker:build:test": "docker build . -t thejimmyg/express-mustache-overlays:test",
     "docker:push:test": "docker push thejimmyg/express-mustache-overlays:test",
-    "docker:run": "docker run -e SCRIPT_NAME='' -e DEBUG'=express-mustache-overlays:server,express-mustache-overlays' -e PORT=80 --init -p 80:80 thejimmyg/express-mustache-overlays:0.5.0",
-    "fix": "standard --fix index.js bin/*.js lib/*.js",
-    "start": "node bin/server.js"
+    "docker:run": "docker run -e SCRIPT_NAME='' -e DEBUG'=express-mustache-overlays:server,express-mustache-overlays' -e PORT=80 --init -p 80:80 thejimmyg/express-mustache-overlays:0.5.1",
+    "fix": "standard --fix"
   },
   "author": "JimmyG",
   "license": "MIT",
   "dependencies": {
     "chokidar": "^2.0.4",
-    "compression": "^1.7.3",
     "debug": "^4.1.0",
-    "express": "^4.16.4",
     "lodash": "^4.17.11",
     "mustache": "^3.0.0",
     "shelljs": "^0.8.3"
