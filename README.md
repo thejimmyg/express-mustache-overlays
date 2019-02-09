@@ -88,17 +88,21 @@ npm install
 
 Then follow the instructions in the `README.md` in the `example` directory.
 
+
 ## Dev
 
 ```
 npm run fix
-npm run "docker:build"
-npm run "docker:run"
-npm run "docker:push"
 ```
 
 
 ## Changelog
+
+### 0.5.2 2019-02-07
+
+* Don't throw an error in the renderer, it creates an `UnhandledPromiseRejectionWarning`. Calling the callback with an error is enough?
+* Improved the Docker example
+* Improved logging
 
 ### 0.5.1 2019-02-07
 
