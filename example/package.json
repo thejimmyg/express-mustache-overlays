@@ -1,13 +1,13 @@
 {
   "name": "express-mustache-overlays-example",
-  "version": "0.5.0",
+  "version": "0.5.3",
   "description": "Example",
   "scripts": {
-    "docker:build": "echo 'Docker cannnot copy files from a parent directory so we need to put the current dev version of express-mustache-overlays in this directory and change package.json'; mkdir -p express-mustache-overlays ; rsync --delete --exclude='example' --exclude='*.DS_Store' --exclude='.git' --exclude='node_modules' -aHxv ../ express-mustache-overlays/ ; cat package.json | sed -e 's|file:..|file:express-mustache-overlays|g' > package.json.docker ; docker build . -t thejimmyg/express-mustache-overlays:0.5.0",
-    "docker:push": "docker push thejimmyg/express-mustache-overlays:0.5.0",
-    "docker:tag:test": "docker image tag thejimmyg/express-mustache-overlays:0.5.0 thejimmyg/express-mustache-overlays:test",
+    "docker:build": "echo 'Docker cannnot copy files from a parent directory so we need to put the current dev version of express-mustache-overlays in this directory and change package.json'; mkdir -p express-mustache-overlays ; rsync --delete --exclude='example' --exclude='*.DS_Store' --exclude='.git' --exclude='node_modules' -aHxv ../ express-mustache-overlays/ ; cat package.json | sed -e 's|file:..|file:express-mustache-overlays|g' > package.json.docker ; docker build . -t thejimmyg/express-mustache-overlays:0.5.3",
+    "docker:push": "docker push thejimmyg/express-mustache-overlays:0.5.3",
+    "docker:tag:test": "docker image tag thejimmyg/express-mustache-overlays:0.5.3 thejimmyg/express-mustache-overlays:test",
     "docker:push:test": "docker push thejimmyg/express-mustache-overlays:test",
-    "docker:run": "docker run -e SCRIPT_NAME='' -e DEBUG'=express-mustache-overlays:server,express-mustache-overlays' -e PORT=80 --init -p 80:80 thejimmyg/express-mustache-overlays:0.5.0",
+    "docker:run": "docker run -e SCRIPT_NAME='' -e DEBUG'=express-mustache-overlays:server,express-mustache-overlays' -e PORT=80 --init -p 80:80 thejimmyg/express-mustache-overlays:0.5.3",
     "fix": "standard --fix",
     "start": "node server.js"
   },

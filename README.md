@@ -11,7 +11,7 @@ Configuration environment variables for the example.
 
 * `MUSTACHE_DIRS` - A `:`-separated list of directories to check for templates e.g. `mustache-overlay:mustache`.
 
-**Any configuration from `MUSTACHE_DIRS` gets merged into existing configuration such that it is used in preference to it. Effecrtively, the `MUSTACHE_DIRS` settings override settings defined in code.**
+**Any configuration from `MUSTACHE_DIRS` gets merged into existing configuration such that it is used in preference to it. Effectively, the `MUSTACHE_DIRS` settings override settings defined in code.**
 
 Additionally:
 
@@ -23,9 +23,14 @@ Additionally:
 Internally, the code is designed to work in these stages:
 
 * `mustacheFromEnv(app)` - Parses and returns the config from the `MUSTACHE_DIRS` environment variable
-* `prepareMustache(app, userDirs, libDirs)` - Sets up the `app.locals.mustache` data structure and makes `app.locals.mustache.overlay()` available (see next). `userDirs` and `libDirs` are optional. You usually pass the output of `mustacheFilesFromEnv(app)` as the `userDirs` variable and any mustache files directoires your library needs as the `libDirs` setting.
+* `prepareMustache(app, userDirs)` - Sets up the `app.locals.mustache` data structure with a `userDir` and a `libDirs` and makes `app.locals.mustache.overlay()` available (see next). `userDirs` is optional. You usually pass the output of `mustacheFromEnv(app)` as the `userDirs` variable. Any library directories (that should be used if a match can't be found in the `userDirs`) can be set up using `overlay()` described next.
 * `app.locals.mustache.overlay(dirs)` - A function other libraries can use to merge any overlays they need into the `libDirs` configuration. The `userDirs` configuration will always overlay over the `libDirs` configuration, even if it is set up earlier.
 * `setupMustache(app)` - Installs the middleware based on the settings in `app.locals.mustache`. This should always come last.
+
+Internally a watch is set up using `chokidar` on any partials that are present
+so that the updated contents can be used by the templates. Since templates (but
+not partials) are read each time they are rendered, the watches are only added
+to the partials since the latest template content will be rendered anyway.
 
 ### Accessing the Overlays Object
 
@@ -97,6 +102,12 @@ npm run fix
 
 
 ## Changelog
+
+### 0.5.3 2019-02-15
+
+* Doc fixes
+* Changed `prepareMustache = (app, userDirs, libDirs)` -> `prepareMustache = (app, userDirs)`
+* Added a warning if directories don't exist
 
 ### 0.5.2 2019-02-07
 
