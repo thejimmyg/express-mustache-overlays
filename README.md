@@ -23,7 +23,7 @@ Additionally:
 Internally, the code is designed to work in these stages:
 
 * `mustacheFromEnv(app)` - Parses and returns the config from the `MUSTACHE_DIRS` environment variable
-* `prepareMustache(app, userDirs)` - Sets up the `app.locals.mustache` data structure with a `userDir` and a `libDirs` and makes `app.locals.mustache.overlay()` available (see next). `userDirs` is optional. You usually pass the output of `mustacheFromEnv(app)` as the `userDirs` variable. Any library directories (that should be used if a match can't be found in the `userDirs`) can be set up using `overlay()` described next.
+* `prepareMustache(app, userDirs)` - Sets up the `app.locals.mustache` data structure with a `userDirs` and a `libDirs` key and makes `app.locals.mustache.overlay()` available (see next). The `userDirs` argument is optional. You usually pass the output of `mustacheFromEnv(app)` as the `userDirs` variable. Any library directories (that should be used if a match can't be found in the `userDirs`) can be set up using `overlay()` described next to add them into `libDirs`.
 * `app.locals.mustache.overlay(dirs)` - A function other libraries can use to merge any overlays they need into the `libDirs` configuration. The `userDirs` configuration will always overlay over the `libDirs` configuration, even if it is set up earlier.
 * `setupMustache(app)` - Installs the middleware based on the settings in `app.locals.mustache`. This should always come last.
 
