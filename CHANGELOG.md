@@ -1,5 +1,7 @@
 # Changelog
 
+**Note: More recent changes can be found in `README.md`.**
+
 ## 0.4.3 2019-01-19
 
 * Added a `pjaxHandlers.mustache` partial
